@@ -44,7 +44,6 @@ jspm_packages/
 
 #Configration Files
 chatAppMessageService/config.js
-chatAppUi/config.js
 
 # TypeScript v1 declaration files
 typings/

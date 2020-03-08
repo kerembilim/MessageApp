@@ -4,12 +4,42 @@ var io = require('socket.io')(http);
 var port = process.env.PORT || 4000;
 const bodyParser = require('body-parser');
 var cors = require('cors');
+const mongoose = require("mongoose");
 let messages =[];
 app.use(
   bodyParser.urlencoded({
     extended: true
   })
-)
+);
+mongoose.connect("mongodb://localhost/messageAppDB")
+    .then(() => console.log("Veritabanı bağlantısı başarıyla sağlanmıştır..."))
+    .catch(error => console.log("Veritabanı bağlantısı sağlanırken beklenmeyen bir hatayla karşılaşıldı...", error.message));
+
+ 
+    var Employees = mongoose.model("Employees", new mongoose.Schema({
+        //_id: Number,
+        userName: String,
+        name: String,
+        surName: String,
+        age: Number
+    }));
+
+    let employee = new Employees({
+     // _id: 3,
+      userName: "abc",
+      name: "X",
+      surName: "Y",
+      age: 35
+  });
+
+  employee.save((error, data) => {
+      if (error) {
+          console.log("Beklenmeyen bir hatayla karşılaşıldı..."+ error);
+      } else {
+          console.log(data);
+      }
+  });
+ 
 
 app.use(cors());
 
