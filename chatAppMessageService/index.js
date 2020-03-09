@@ -3,8 +3,9 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var port = process.env.PORT || 4000;
 const bodyParser = require('body-parser');
-var cors = require('cors');
 const mongoose = require("mongoose");
+var cors = require('cors');
+const MessageModel = require('./models/messageModel');
 let messages =[];
 app.use(
   bodyParser.urlencoded({
@@ -15,30 +16,24 @@ mongoose.connect("mongodb://localhost/messageAppDB")
     .then(() => console.log("Veritabanı bağlantısı başarıyla sağlanmıştır..."))
     .catch(error => console.log("Veritabanı bağlantısı sağlanırken beklenmeyen bir hatayla karşılaşıldı...", error.message));
 
+    
+
+  let messageSave = (msg) =>{
+    let message = new MessageModel({
+      // _id: 3,
+      messageContent: msg.content,
+      sender: msg.sender,
+      target: msg.target,
+      date: Date.now()
+   });
  
-    var Employees = mongoose.model("Employees", new mongoose.Schema({
-        //_id: Number,
-        userName: String,
-        name: String,
-        surName: String,
-        age: Number
-    }));
-
-    let employee = new Employees({
-     // _id: 3,
-      userName: "abc",
-      name: "X",
-      surName: "Y",
-      age: 35
-  });
-
-  employee.save((error, data) => {
-      if (error) {
-          console.log("Beklenmeyen bir hatayla karşılaşıldı..."+ error);
-      } else {
-          console.log(data);
-      }
-  });
+ 
+   message.save((error, data) => {
+       if (error) {
+           console.log("Beklenmeyen bir hatayla karşılaşıldı..."+ error);
+       }
+   });
+  }
  
 
 app.use(cors());
@@ -102,6 +97,12 @@ app.get('/getOldMessages',(req,res)=>{
   res.json(messages);
 })
 
+app.get('/getmessages',(req,res)=>{
+  MessageModel.find({}).sort({_id:-1}).limit(2).exec(function(err, leads){
+    res.send(leads);
+    });
+})
+
 app.post('/getContacts', function(req, res){
   const contacts = [
     {
@@ -139,7 +140,7 @@ io.on('connection', function(socket){
 
   socket.on('chatmessage', (msg) => {
     messages.push(msg);
-    console.log(messages);
+    messageSave(msg);
     io.emit(msg.target, msg);
   });
 });
