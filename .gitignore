@@ -40,6 +40,7 @@ build/Release
 # Dependency directories
 chatAppMessageService/node_modules
 chatAppUi/node_modules
+chatAppAuthenticationService/node_modules
 jspm_packages/
 
 #Configration Files
