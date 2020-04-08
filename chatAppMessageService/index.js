@@ -103,36 +103,7 @@ app.get('/getmessages',(req,res)=>{
     });
 })
 
-app.post('/getContacts', function(req, res){
-  const contacts = [
-    {
-      userName:'Siri',
-      statu:'online',
-      image:'https://images.unsplash.com/photo-1525450280520-7d542a86e065?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1350&q=80'
-    },
-    {
-      userName:'Alexa',
-      statu:'online',
-      image:'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60'
-    },
-    {
-      userName:'Vision',
-      statu:'online',
-      image:'https://i.pinimg.com/originals/12/75/4a/12754ac600a5806ac7e401e776382952.jpg'
-    }
-  ];
-    
-  
-  let response = [];
-  if(req.body.userName === contacts[0].userName ){
-    response.push(contacts[1],contacts[2]);
-  }
-  else if(req.body.userName === contacts[1].userName){
-    response.push(contacts[0],contacts[2]);
-  }
-    
-  res.json(response);
-});
+
 
 
 
