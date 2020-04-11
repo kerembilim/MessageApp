@@ -41,13 +41,15 @@ const tokenControl = async(req,res,next) =>{
             console.error('connection error', err.stack)
           }
         });
+        
         const resDb = await client.query('select * from users where username = $1 and password = $2', [data.user.username,data.user.password]);
         await client.end()
-
+        
         if(resDb.rows == null || resDb.rows.length <=0 ){
           res.json({Error:'User not found'});
         }
         else{
+          console.log(data);
           next();
         }
       }
@@ -115,20 +117,20 @@ router.post('/loginControl',async(req, res, next) => {
 
 
 
-router.post('/getContacts',tokenControl,(req, res) =>{
+router.post('/getContacts',tokenControl,(req, res) => {
   const contacts = [
     {
-      userName:'Siri',
+      username:'Siri',
       statu:'online',
       image:'https://images.unsplash.com/photo-1525450280520-7d542a86e065?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1350&q=80'
     },
     {
-      userName:'Alexa',
+      username:'Alexa',
       statu:'online',
       image:'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60'
     },
     {
-      userName:'Vision',
+      username:'Vision',
       statu:'online',
       image:'https://i.pinimg.com/originals/12/75/4a/12754ac600a5806ac7e401e776382952.jpg'
     }
@@ -136,10 +138,10 @@ router.post('/getContacts',tokenControl,(req, res) =>{
     
   
   let response = [];
-  if(req.body.userName === contacts[0].userName ){
+  if(req.body.username === contacts[0].username ){
     response.push(contacts[1],contacts[2]);
   }
-  else if(req.body.userName === contacts[1].userName){
+  else if(req.body.username === contacts[1].username){
     response.push(contacts[0],contacts[2]);
   }
   else{

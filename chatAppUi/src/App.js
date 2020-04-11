@@ -26,26 +26,17 @@ class App extends React.Component {
   }
 
   componentDidMount(){
-    var self = this;
-    axios.post('http://localhost:5000/users/getContacts', {
-        username: this.state.username
-    }).then(function (response) {
-        self.setState({contacts:response.data});
-      });
-      this.getOldMessages();
-
+    this.getOldMessages();
     this.loginControl();
   }
   
   addMessageArea (message) {
-    
     var css,head,style,node ;
-    if(message.sender === this.state.userName){
+    if(message.sender === this.state.username){
       css = 'mymessage { background: #baecba; float:right; clear: both;padding:2%; margin:1%;max-width:300px; word-wrap:break-word;border-radius:5px; }';
       head = document.head || document.getElementsByTagName('head')[0];
       style = document.createElement('style');
       node = document.createElement("mymessage");
-      
     }
     else{
       css = 'stranger { background: #fffdfa; float:left; clear: both;padding:2%; margin:1%;max-width:300px; word-wrap:break-word;border-radius:5px; }';
@@ -136,7 +127,6 @@ class App extends React.Component {
     var self = this;
   axios.get('http://localhost:4000/getOldMessages', ).then(function (response) {
       self.setState({messages:response.data});
-      console.log(self.state.messages)
     })
     
     
