@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 var MessageModel = new mongoose.Schema({
-    messageContent: String,
+    content: String,
     sender: String,
     target: String,
     date: Date

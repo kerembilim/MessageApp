@@ -19,9 +19,9 @@ mongoose.connect("mongodb://localhost/messageAppDB")
     
 
   let messageSave = (msg) =>{
+    console.log(msg);
     let message = new MessageModel({
-      // _id: 3,
-      messageContent: msg.content,
+      content: msg.content,
       sender: msg.sender,
       target: msg.target,
       date: Date.now()
@@ -40,75 +40,13 @@ app.use(cors());
 
 app.use(bodyParser.json())
 
-app.post('/login', function(req, res){
-  const loginData = {
-    userName:'Siri',
-    password:'123'
-  };
-  const loginData2 = {
-    userName:'Alexa',
-    password:'123'
-  };
-  let response = {};
-  if(req.body.userName === loginData.userName && req.body.password === loginData.password)
-  {
-    response.result = 'basarili';
-    response.token = '1*1*1*1*1';
-    response.userName = 'Siri';
-  }
-  else if(req.body.userName == loginData2.userName && req.body.password === loginData2.password)
-  {
-    response.result = 'basarili';
-    response.token = '2*2*2*2*2';
-    response.userName = 'Alexa';
-  }
-  else 
-    response.result = 'basarisiz';
-  res.json(response);
-});
-
-app.post('/loginControl', function(req, res){
-  const loginData = {
-    userName:'Siri',
-    password:'123',
-    token:'1*1*1*1*1' 
-  };
-  const loginData2 = {
-    userName:'Alexa',
-    password:'123',
-    token:'2*2*2*2*2'
-  };
-  
-  let response = {};
-  if(req.body.token === loginData.token ){
-    response.result = 'basarili';
-    response.userName = loginData.userName;
-  }
-  else if(req.body.token === loginData2.token){
-    response.result = 'basarili';
-    response.userName = loginData2.userName;
-  }
-    
-
-  res.json(response);
-});
-
-app.get('/getOldMessages',(req,res)=>{
-  res.json(messages);
-})
-
 app.get('/getmessages',(req,res)=>{
-  MessageModel.find({}).sort({_id:-1}).limit(2).exec(function(err, leads){
+  MessageModel.find({$or: [ { target:req.query.username }, { sender:req.query.username }]}).sort({_id:1}).limit(500).exec(function(err, leads){
     res.send(leads);
     });
 })
 
-
-
-
-
 io.on('connection', function(socket){
-
   socket.on('chatmessage', (msg) => {
     messages.push(msg);
     messageSave(msg);

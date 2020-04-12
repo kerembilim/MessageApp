@@ -20,14 +20,29 @@ class App extends React.Component {
     this.handleCloseModal = this.handleCloseModal.bind(this);
     this.loginControl = this.loginControl.bind(this);
     this.getContacts = this.getContacts.bind(this);
-    this.getOldMessages = this.getOldMessages.bind(this);
+    this.getMessages = this.getMessages.bind(this);
     this.addMessageArea = this.addMessageArea.bind(this);
     this.login = this.login.bind(this);
   }
 
-  componentDidMount(){
-    this.getOldMessages();
-    this.loginControl();
+  async componentDidMount(){
+    await this.loginControl();
+    await this.getMessages();
+    
+  }
+
+  enterClick = (e) =>{
+    if (e.keyCode === 13 && this.state.value != '') {
+      const message = {
+        content:this.state.value,
+        target:this.state.messageTarget.username,
+        sender:this.state.username
+     }
+     this.sendMessage(message);
+     this.setState({value:''});
+     document.getElementById('messageArea').innerHTML = "";
+    }
+    
   }
   
   addMessageArea (message) {
@@ -66,24 +81,21 @@ class App extends React.Component {
     this.socket.emit('chatmessage',message);
     let messages = this.state.messages;
     messages.push(message);
-    console.log(messages)
     this.setState({messages});
   }
 
-  loginControl = () =>{
+  loginControl = async() =>{
     var self = this;
-    axios.post('http://localhost:5000/users/loginControl', {
-  },{
+    await axios.post('http://localhost:5000/users/loginControl', {
+    },{
     headers: { Authorization: "Bearer " + localStorage.getItem('userToken') }
-}).then(function (response) {
+    }).then(async function (response) {
     if(response.data.result === 'basarili'){
-      self.setState({showModal:false});
-      self.setState({username:response.data.username});
-      self.initSocketConnection();
-      self.getContacts = self.getContacts.bind(self);
-      self.getContacts();
+      await self.setState({showModal:false});
+      await self.setState({username:response.data.username});
+      await self.initSocketConnection();
+      await self.getContacts();
     }
-    
   });
   }
   
@@ -111,25 +123,22 @@ class App extends React.Component {
   
   getContacts() {
     var self = this;
-    axios.post('http://localhost:5000/users/getContacts', {
-        username: this.state.username
-    },{
+    axios.get('http://localhost:5000/users/getContacts' + '/' + this.state.username, {
       headers: { Authorization: "Bearer " + localStorage.getItem('userToken') }}).then(function (response) {
       self.setState({contacts:response.data});
       self.list = response.data;
-    
     })
-    
-    
   }
 
-  getOldMessages() {
+  getMessages = async () => {
     var self = this;
-  axios.get('http://localhost:4000/getOldMessages', ).then(function (response) {
-      self.setState({messages:response.data});
+    await axios.get('http://localhost:4000/getmessages',{
+      params: {
+        username: this.state.username
+      }
+    } ).then(async function (response) {
+      await self.setState({messages:response.data});
     })
-    
-    
   }
 
 
@@ -149,23 +158,18 @@ class App extends React.Component {
 
   initSocketConnection() {
     var self = this;
-    let messages = this.state.messages;
-    this.socket = io.connect('http://localhost:4000');
-    this.socket.on(this.state.username, (msg) => {
-      
-      messages.push(msg);
-      document.getElementById('messageArea').innerHTML = ""; 
-      self.setState({messages});
-      
-    });
     
-  }
-
-  
+    this.socket = io.connect('http://localhost:4000');
+    this.socket.on(this.state.username, async(msg) => {
+      let newMessages = self.state.messages;
+      newMessages.push(msg);
+      document.getElementById('messageArea').innerHTML = "";
+      self.setState({messages:newMessages});
+    });
+  }  
 
   render() {
     return (
-
       <div className="bg-dim full-bg-size" style={{backgroundImage: `url(${messageBackground})`}}>
         <ReactModal 
            ariaHideApp={false}
@@ -215,8 +219,6 @@ class App extends React.Component {
           }
           <div id ='messageArea' >
             {
-              
-              
               this.state.messages.map(index =>{
                 if(index.target == this.state.messageTarget.username || index.sender == this.state.messageTarget.username){
                   this.addMessageArea(index);
@@ -228,9 +230,10 @@ class App extends React.Component {
          {
            this.state.messageTarget.username ? 
            <div>
-           <input type="text" className="message" value={this.state.value} onChange={this.handleChange} />
+           <input type="text" onKeyUp={this.enterClick} id='messageText' className="message" value={this.state.value} onChange={this.handleChange} />
            <input type="submit" className="button" value="GÖNDER" onClick = {() =>{
-             const message = {
+             if(this.state.value != ''){
+              const message = {
                 content:this.state.value,
                 target:this.state.messageTarget.username,
                 sender:this.state.username
@@ -238,6 +241,8 @@ class App extends React.Component {
              this.sendMessage(message);
              this.setState({value:''});
              document.getElementById('messageArea').innerHTML = "";
+             }
+             
            }} />
          </div> : null
          }

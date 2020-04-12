@@ -31,6 +31,7 @@ const tokenControl = async(req,res,next) =>{
     const bearerToken = bearer[1];
     req.token = bearerToken;
     jwt.verify(bearerToken,config.jwtSecretKey,async (err,data)=>{
+      console.log(data)
       if(err){
         res.sendStatus(403).send({ error: 'Invalid Token.' });
       }
@@ -117,7 +118,7 @@ router.post('/loginControl',async(req, res, next) => {
 
 
 
-router.post('/getContacts',tokenControl,(req, res) => {
+router.get('/getContacts/:username',tokenControl,async(req, res) => {
   const contacts = [
     {
       username:'Siri',
@@ -135,20 +136,31 @@ router.post('/getContacts',tokenControl,(req, res) => {
       image:'https://i.pinimg.com/originals/12/75/4a/12754ac600a5806ac7e401e776382952.jpg'
     }
   ];
+
+  const client = createClient();
+  try{
+    client.connect(err => {
+      if (err) {
+        console.error('connection error', err.stack) 
+      }
+    });
+    console.log(req.query.username + ' qasda');
+    const resDb = await client.query("SELECT username,'online' statu,photourl image FROM USERS WHERE username <> $1", [req.params.username]);
+    if(resDb.rows == null || resDb.rows.length <=0 ){
+      res.json({Error:'User not found'});
+    }
+    else{
+      res.json(resDb.rows);
+    }
+  }
+  catch(err){
+    res.json(err);
+
+  }
+  finally{
+    await client.end()
+  }
     
-  
-  let response = [];
-  if(req.body.username === contacts[0].username ){
-    response.push(contacts[1],contacts[2]);
-  }
-  else if(req.body.username === contacts[1].username){
-    response.push(contacts[0],contacts[2]);
-  }
-  else{
-    response.push(contacts[0],contacts[1],contacts[2]);
-  }
-    
-  res.json(response);
 });
 
 
