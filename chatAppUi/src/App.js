@@ -2,6 +2,7 @@ import React from 'react';
 import './App.css';
 import ReactModal from 'react-modal';
 import messageBackground from './utilies/messageBackground.jpeg';
+import DownloadFile from './DownloadFile';
 
 const io = require('socket.io-client');
 const axios = require('axios');
@@ -197,6 +198,7 @@ class App extends React.Component {
            <input type="submit" style={{float:'right'}} value="GÖNDER"  onClick={ this.login } />
         </ReactModal>
 
+          <DownloadFile/>
         <div className="connectList" >
           {this.state.contacts.map(index => 
                 <div key={index.username} className="connect" onClick = {()=>{this.setState({messageTarget:index}); document.getElementById('messageArea').innerHTML = "";}} >

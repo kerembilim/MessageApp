@@ -5,6 +5,11 @@ var jwt = require('jsonwebtoken');
 var CryptoJS = require("crypto-js");
 const config = require('../config');
 
+const path = require('path');
+
+
+
+
 const { Pool,Client } = require('pg')
 
 let pool;
@@ -43,6 +48,13 @@ const tokenControl = async(req,res,next) =>{//ayarlanacak
 router.get('/', tokenControl,async(req, res, next) => {
   res.json({isim:'kerem'});
 
+});
+
+router.get('/download', function(req, res){
+  const file = '1587851977424-Sunum1.pptx';
+  var fileLocation = path.join('./messageFile',file);
+  console.log(fileLocation);
+  res.download(fileLocation, file); 
 });
 
 router.post('/messagefileupload',function(req, res) {
