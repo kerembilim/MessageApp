@@ -34,6 +34,12 @@ bower_components
 # node-waf configuration
 .lock-wscript
 
+# Project configration and run script
+run.sh
+
+#uploaded files
+chatAppFileUploadService/messageFile
+
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 build/Release
 
@@ -41,6 +47,7 @@ build/Release
 chatAppMessageService/node_modules
 chatAppUi/node_modules
 chatAppAuthenticationService/node_modules
+chatAppFileUploadService/node_modules
 jspm_packages/
 
 #Configration Files
