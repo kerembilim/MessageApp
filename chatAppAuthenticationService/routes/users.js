@@ -197,6 +197,46 @@ router.post('/login',  async(req, res, next) =>{
   }
 });
 
+router.post('/usercontrol',  async(req, res, next) =>{
+  const bearerHeader = req.headers["authorization"];
+  
+  console.log(req.headers);
+  if(typeof bearerHeader != 'undefined'){
+    const bearer = bearerHeader.split(" ");
+    const bearerToken = bearer[1];
+    req.token = bearerToken;
+    
+    jwt.verify(bearerToken,config.jwtSecretKey,async (err,data)=>{
+      if(err){
+        res.sendStatus(403).send({ error: 'Invalid Token.' });
+      }
+      else{
+        const client = createClient();
+        client.connect(err => {
+          if (err) {
+            console.error('connection error', err.stack)
+          }
+        });
+        const resDb = await client.query('select * from users where username = $1 and password = $2', [data.user.username,data.user.password]);
+        await client.end()
+
+        if(resDb.rows == null || resDb.rows.length <=0 ){
+          res.json({Error:'User not found'});
+        }
+        else{
+          res.json(resDb.rows[0]);
+        }
+      }
+        
+    })
+     
+  }
+  else{
+    res.sendStatus(403);
+  }
+
+});
+
 router.post('/register',async(req, res, next) =>{
   const user = req.body;
   connectionInitialize();

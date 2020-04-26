@@ -4,6 +4,7 @@ var multer = require('multer');
 var jwt = require('jsonwebtoken');
 var CryptoJS = require("crypto-js");
 const config = require('../config');
+const axios = require('axios');
 
 const path = require('path');
 
@@ -32,17 +33,31 @@ var messageFileStorage = multer.diskStorage({
   cb(null, 'messageFile')
 },
 filename: function (req, file, cb) {
-  cb(null, Date.now() + '-' +file.originalname )
+  var today = new Date();
+  var dd = String(today.getDate()).padStart(2, '0');
+  var Month = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+  var yyyy = today.getFullYear();
+  var hh = today.getHours();
+  var mm = today.getMinutes();
+  var ss = today.getSeconds();
+  today = dd + '.' + Month + '.' + yyyy + '|' + hh + ':' + mm + ':' + ss;
+  cb(null, req.user.username + '|' + today + '-' +file.originalname )
 }
 })
 
 var messagefileupload = multer({ storage: messageFileStorage }).single('file')
-
-
-
-
-const tokenControl = async(req,res,next) =>{//ayarlanacak
-  next();
+const tokenControl = async(req,res,next) =>{
+  var rr = await axios.post('http://localhost:5000/users/usercontrol', null, {
+    headers: {
+        'Content-Type': 'application/json',
+        'authorization': req.headers.authorization,
+    }
+    }
+  )
+  if(rr.data.id !== 0 && rr.data.id > 0){
+    req.user = rr.data;
+    next();
+  }    
 };
 /* GET users listing. */
 router.get('/', tokenControl,async(req, res, next) => {
@@ -57,8 +72,8 @@ router.get('/download', function(req, res){
   res.download(fileLocation, file); 
 });
 
-router.post('/messagefileupload',function(req, res) {
-     
+router.post('/messagefileupload',tokenControl,function(req, res) {
+
   messagefileupload(req, res, function (err) {
          if (err instanceof multer.MulterError) {
              return res.status(500).json(err)

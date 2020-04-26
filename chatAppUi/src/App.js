@@ -3,9 +3,10 @@ import './App.css';
 import ReactModal from 'react-modal';
 import messageBackground from './utilies/messageBackground.jpeg';
 import DownloadFile from './DownloadFile';
+import axios,{post} from 'axios';
 
 const io = require('socket.io-client');
-const axios = require('axios');
+
 
 class App extends React.Component {
   socket = null;
@@ -13,7 +14,7 @@ class App extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {value: '',password: '',showModal: true, username:'',contacts:[],messageTarget : {}, messages: []};
+    this.state = {value: '',password: '',showModal: true, username:'',contacts:[],messageTarget : {}, messages: [],file:null};
     this.handleChange = this.handleChange.bind(this);
     this.handleChangeUsername = this.handleChangeUsername.bind(this);
     this.handleChangePass = this.handleChangePass.bind(this);
@@ -24,12 +25,37 @@ class App extends React.Component {
     this.getMessages = this.getMessages.bind(this);
     this.addMessageArea = this.addMessageArea.bind(this);
     this.login = this.login.bind(this);
+    this.onFormSubmit = this.onFormSubmit.bind(this)
+    this.onChange = this.onChange.bind(this)
+    this.fileUpload = this.fileUpload.bind(this)
   }
 
   async componentDidMount(){
     await this.loginControl();
     await this.getMessages();
     
+  }
+  onFormSubmit(e){
+    e.preventDefault() // Stop form submit
+    this.fileUpload(this.state.file).then((response)=>{
+      console.log(response.data);
+    })
+  }
+  onChange(e) {
+    this.setState({file:e.target.files[0]})
+    this.fileUpload(this.state.file);
+  }
+  fileUpload(file){
+    const url = 'http://localhost:4010/fileupload/messagefileupload';
+    const formData = new FormData();
+    formData.append('file',file)
+    const config = {
+        headers: {
+            'content-type': 'multipart/form-data',
+            'Authorization': 'Bearer ' + localStorage.getItem('userToken')
+        }
+    }
+    return  post(url, formData,config)
   }
 
   enterClick = (e) =>{
@@ -198,7 +224,9 @@ class App extends React.Component {
            <input type="submit" style={{float:'right'}} value="GÖNDER"  onClick={ this.login } />
         </ReactModal>
 
-          <DownloadFile/>
+        
+
+          {/* <DownloadFile/> */}
         <div className="connectList" >
           {this.state.contacts.map(index => 
                 <div key={index.username} className="connect" onClick = {()=>{this.setState({messageTarget:index}); document.getElementById('messageArea').innerHTML = "";}} >
@@ -233,7 +261,7 @@ class App extends React.Component {
            this.state.messageTarget.username ? 
            <div>
            <input type="text" onKeyUp={this.enterClick} id='messageText' className="message" value={this.state.value} onChange={this.handleChange} />
-           <input type="submit" className="button" value="GÖNDER" onClick = {() =>{
+           <input id="btnSend" type="submit" className="button" value="GÖNDER" onClick = {() =>{
              if(this.state.value != ''){
               const message = {
                 content:this.state.value,
@@ -246,6 +274,11 @@ class App extends React.Component {
              }
              
            }} />
+           
+          
+            <input type="file" onChange={this.onChange} className="button" />
+            <button type="submit" className="button" onClick={this.onFormSubmit}>Upload</button>
+          
          </div> : null
          }
          
