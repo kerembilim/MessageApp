@@ -38,7 +38,7 @@ body {
 }
 
 .connectList{
-  margin-top: 5%;
+  margin-top: 2%;
   margin-left: 2%;
   float:left;
   background: rgba(150, 135, 135, 0.5);
@@ -71,7 +71,7 @@ body {
   float:left;
   margin-right: 2%;
   margin-left: 5%;
-  margin-top: 5%;
+  margin-top: 2%;
   border-color: rgba(22, 20, 20, 0.5);
   width:60%;
   height: 80%;
@@ -121,10 +121,10 @@ a:hover {
 .header {
   position: relative;
   width: 100%;
-  background: indianred;
+  background: #202730;
   height: 50px;
   line-height: 50px;
-  box-shadow: 0 -3px 0 #bc3a3a inset;
+  box-shadow: 0 -3px 0 #202730 inset;
 }
 
 .wrap {
@@ -171,7 +171,7 @@ a:hover {
 }
 
 .navbar {
-  background-color: indianred;
+  background-color: #202730;
   float: none;
   max-height: 0;
   overflow: hidden;
@@ -236,7 +236,7 @@ a:hover {
     max-height: none;
   }
   .navbar .menu {
-    box-shadow: 0 -3px 0 #bc3a3a inset;
+    box-shadow: 0 -3px 0 #202730 inset;
   }
   .navbar .menu li {
     list-style-type: none;
