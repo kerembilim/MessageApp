@@ -198,6 +198,23 @@ class App extends React.Component {
   render() {
     return (
       <div className="bg-dim full-bg-size" style={{backgroundImage: `url(${messageBackground})`}}>
+        <header className="header">
+
+<div className="wrap">
+
+  <h2 className="logo"><a href="#">Website Logo</a></h2>
+
+  <a id="menu-icon">&#9776; Menu</a>
+
+  <nav className="navbar">
+    <ul className="menu">
+    <li><a href="#">Hesap işlemleri</a></li>
+    <li><a href="#">Çıkış</a></li>
+    </ul>
+  </nav>
+
+</div>
+</header>
         <ReactModal 
            ariaHideApp={false}
            isOpen={this.state.showModal}
