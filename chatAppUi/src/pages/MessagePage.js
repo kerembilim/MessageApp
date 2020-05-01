@@ -77,7 +77,6 @@ export default class MessagePage extends Component {
   handleChange(event) {
     this.setState({ value: event.target.value });
     document.getElementById('messageArea').innerHTML = "";
-
   }
 
 
@@ -97,9 +96,19 @@ export default class MessagePage extends Component {
     e.preventDefault() // Stop form submit
     this.fileUpload(this.state.file).then((response) => {
       console.log(response.data);
+      const message = {
+        content: response.data.originalname,
+        target: this.state.messageTarget.username,
+        sender: this.state.username,
+        messageType: 'file'
+      }
+      document.getElementById('messageArea').innerHTML = "";
+      this.sendMessage(message);
+
     })
   }
   onChange(e) {
+    document.getElementById('messageArea').innerHTML = "";
     this.setState({ file: e.target.files[0] })
     this.fileUpload(this.state.file);
   }
@@ -121,7 +130,8 @@ export default class MessagePage extends Component {
       const message = {
         content: this.state.value,
         target: this.state.messageTarget.username,
-        sender: this.state.username
+        sender: this.state.username,
+        messageType: 'message'
       }
       this.sendMessage(message);
       this.setState({ value: '' });
@@ -137,12 +147,24 @@ export default class MessagePage extends Component {
       head = document.head || document.getElementsByTagName('head')[0];
       style = document.createElement('style');
       node = document.createElement("mymessage");
+      if (message.messageType === 'file') {
+        node.onclick = function () {
+          console.log('sdsssd');
+        };
+      }
+
+
     }
     else {
       css = 'stranger { background: #fffdfa; float:left; clear: both;padding:2%; margin:1%;max-width:300px; word-wrap:break-word;border-radius:5px; }';
       head = document.head || document.getElementsByTagName('head')[0];
       style = document.createElement('style');
       node = document.createElement("stranger");
+      if (message.messageType === 'file') {
+        node.onclick = function () {
+          console.log('sdsssd');
+        };
+      }
     }
     head.appendChild(style);
 
@@ -153,8 +175,9 @@ export default class MessagePage extends Component {
     } else {
       style.appendChild(document.createTextNode(css));
     }
+    var textnode;
+    textnode = document.createTextNode(message.sender + ': ' + message.content);
 
-    var textnode = document.createTextNode(message.sender + ': ' + message.content);
     node.appendChild(textnode);
     document.getElementById("messageArea").appendChild(node);
 
@@ -210,7 +233,8 @@ export default class MessagePage extends Component {
                   const message = {
                     content: this.state.value,
                     target: this.state.messageTarget.username,
-                    sender: this.state.username
+                    sender: this.state.username,
+                    messageType: 'message'
                   }
                   this.sendMessage(message);
                   this.setState({ value: '' });

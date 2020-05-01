@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
-import messageBackground from './utilies/messageBackground.jpeg';
 import axios from 'axios';
 
 //Project Components
@@ -10,10 +9,8 @@ import NavBar from './components/NavBar';
 //pages
 import MessagePage from './pages/MessagePage'
 
-
-
 import './App.css';
-const io = require('socket.io-client');
+import messageBackground from './utilies/messageBackground.jpeg';
 
 
 class App extends React.Component {

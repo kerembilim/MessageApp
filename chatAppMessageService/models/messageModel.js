@@ -4,7 +4,8 @@ var MessageModel = new mongoose.Schema({
     content: String,
     sender: String,
     target: String,
-    date: Date
+    date: Date,
+    messageType: String
 });
 
 module.exports = mongoose.model('messages', MessageModel)
