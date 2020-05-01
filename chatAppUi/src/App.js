@@ -1,13 +1,18 @@
 import React from 'react';
-import './App.css';
-import ReactModal from 'react-modal';
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import messageBackground from './utilies/messageBackground.jpeg';
-import DownloadFile from './components/DownloadFile';
-import axios, { post } from 'axios';
+import axios from 'axios';
+
+//Project Components
+import LoginModal from './components/LoginModal';
+import NavBar from './components/NavBar';
 
 //pages
 import MessagePage from './pages/MessagePage'
 
+
+
+import './App.css';
 const io = require('socket.io-client');
 
 
@@ -43,7 +48,6 @@ class App extends React.Component {
       this.login()
     }
     else {
-      console.log(localStorage.getItem('userToken'))
       var self = this;
       await axios.post('http://localhost:5000/users/loginControl', {
       }, {
@@ -73,7 +77,7 @@ class App extends React.Component {
         localStorage.setItem("userToken", response.data.token);
         localStorage.setItem("userName", response.data.username);
         self.setState({ username: response.data.username });
-         window.location.reload()
+        window.location.reload()
       }
     })
   }
@@ -86,60 +90,36 @@ class App extends React.Component {
 
   render() {
     return (
-      <div >
-        <header className="header">
-          <div className="wrap">
-            <h2 className="logo"><a href="">Website Logo</a></h2>
-            <select id="mySelect" onChange={this.myFunction}>
-              <option value="volvo">Volvo</option>
-              <option value="saab">Saab</option>
-            </select>
-            <a id="menu-icon">&#9776; Menu</a>
+      <Router>
+        <div >
+          <NavBar/>
 
-            <nav className="navbar">
-              <ul className="menu">
-                <li><a href="#">Hesap işlemleri</a></li>
-                <li><a href="#">Çıkış</a></li>
-              </ul>
-            </nav>
+          
 
-          </div>
-        </header>
-        
-        <ReactModal
-          ariaHideApp={false}
-          isOpen={this.state.showModal}
-          contentLabel="Minimal Modal Example"
-          style={{
-            content: {
-              backgroundColor: '#708090',
-              borderRadius: 15,
-              width: 400,
-              height: 200,
-              margin: 'auto',
-              paddingTop: 0
+          <LoginModal
+            showModal = {this.state.showModal}
+            onChangeUserName = {this.handleChangeUsername}
+            onChangePassword = {this.handleChangePass}
+            login = {this.login}
+          />
+
+					
+
+          <div className="bg-dim full-bg-size" style={{ backgroundImage: `url(${messageBackground})` }}>
+
+          <Route path="/message" exact strict component={MessagePage} />
+
+					<Route path="/" exact render={
+            () => {
+              return(<h1>Home page</h1>)
             }
-          }}
-        >
-          <p style={{ fontSize: 20 }}>Login</p>
-          <hr />
-          <input type="text" style={{ width: 250, height: 30, borderRadius: 15, textIndent: 30, marginLeft: 20 }} value={this.state.username} onChange={this.handleChangeUsername} />
-          <br />
-          <br />
-          <input type="password" style={{ width: 250, height: 30, borderRadius: 15, textIndent: 30, marginLeft: 20 }} value={this.state.password} onChange={this.handleChangePass} />
-          <br />
-          <input type="submit" style={{ float: 'right' }} value="GÖNDER" onClick={this.login} />
-        </ReactModal>
+          } />          
+          </div>
 
-        <div className="bg-dim full-bg-size" style={{ backgroundImage: `url(${messageBackground})` }}>
-          <MessagePage
-            username={this.state.username} />
+
         </div>
 
-
-      </div>
-
-
+      </Router>
 
 
     );

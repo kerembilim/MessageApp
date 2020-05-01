@@ -37,7 +37,6 @@ export default class MessagePage extends Component {
   loginControl = async () => {
 
     if (localStorage.getItem('userToken') !== null && localStorage.getItem('userToken') !== '') {
-      console.log(localStorage.getItem('userToken'));
       var self = this;
       await axios.post('http://localhost:5000/users/loginControl', {}, {
         headers: { Authorization: "Bearer " + localStorage.getItem('userToken') }
