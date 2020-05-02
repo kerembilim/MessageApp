@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import CKEditor from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+
+import UploadAdapter from './UploadAdapter';
 export default class componentName extends Component {
 
     state = {
@@ -12,17 +14,13 @@ export default class componentName extends Component {
                 <CKEditor
                     editor={ ClassicEditor }
                     data="<p>Hello from CKEditor 5!</p>"
-                    onInit={ editor => {
-                        // You can store the "editor" and use when it is needed.
-                        console.log( 'Editor is ready to use!', editor );
-                    } }
-                    config={{
-                        simpleUpload: {
-                          uploadUrl: 'https://myserver.herokuapp.com/image-upload'
-                        },
-                        toolbar: ['heading', '|', 'bold', 'italic', 'blockQuote', 'link', 'numberedList', 'bulletedList', 'imageUpload', 'insertTable',
-                          'tableColumn', 'tableRow', 'mergeTableCells', 'mediaEmbed', '|', 'undo', 'redo']
-                      }}
+                    onInit={editor => {
+                        editor.plugins.get( 'FileRepository' ).createUploadAdapter = function ( loader ) {
+                            console.log(loader.file);
+                         return new UploadAdapter( loader );
+                        };
+                       }}
+                    
                     onChange={ ( event, editor ) => {
                         
                         const data = editor.getData();

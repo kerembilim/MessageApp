@@ -109,6 +109,7 @@ export default class MessagePage extends Component {
   }
   onChange(e) {
     document.getElementById('messageArea').innerHTML = "";
+    console.log(e.target.files[0]);
     this.setState({ file: e.target.files[0] })
     this.fileUpload(this.state.file);
   }

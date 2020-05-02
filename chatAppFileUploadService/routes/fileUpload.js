@@ -11,76 +11,101 @@ const path = require('path');
 
 
 
-const { Pool,Client } = require('pg')
+const { Pool, Client } = require('pg')
 
 let pool;
 
 
-const createClient = () =>{
- 
-    return new Client({
-      host: config.dbHost,
-      port: config.dbPort,
-      database: config.dbName,
-      user: config.dbUser,
-      password: config.dbPassword,
-    });
+const createClient = () => {
+
+  return new Client({
+    host: config.dbHost,
+    port: config.dbPort,
+    database: config.dbName,
+    user: config.dbUser,
+    password: config.dbPassword,
+  });
 
 }
 
 var messageFileStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-  cb(null, 'messageFile')
-},
-filename: function (req, file, cb) {
-  var today = new Date();
-  var dd = String(today.getDate()).padStart(2, '0');
-  var Month = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-  var yyyy = today.getFullYear();
-  var hh = today.getHours();
-  var mm = today.getMinutes();
-  var ss = today.getSeconds();
-  today = dd + '.' + Month + '.' + yyyy + '|' + hh + ':' + mm + ':' + ss;
-  cb(null, req.user.username + '|' + today + '-' +file.originalname )
-}
+    cb(null, 'messageFile')
+  },
+  filename: function (req, file, cb) {
+    var today = new Date();
+    var dd = String(today.getDate()).padStart(2, '0');
+    var Month = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    var yyyy = today.getFullYear();
+    var hh = today.getHours();
+    var mm = today.getMinutes();
+    var ss = today.getSeconds();
+    var ms = today.getMilliseconds();
+    today = dd + '.' + Month + '.' + yyyy + '|' + hh + ':' + mm + ':' + ss + ':' + ms;
+    cb(null, req.user.username + '|' + today + '-' + file.originalname)
+  }
 })
 
 var messagefileupload = multer({ storage: messageFileStorage }).single('file')
-const tokenControl = async(req,res,next) =>{
+const tokenControl = async (req, res, next) => {
   var rr = await axios.post('http://localhost:5000/users/usercontrol', null, {
     headers: {
-        'Content-Type': 'application/json',
-        'authorization': req.headers.authorization,
+      'Content-Type': 'application/json',
+      'authorization': req.headers.authorization,
     }
-    }
+  }
   )
-  if(rr.data.id !== 0 && rr.data.id > 0){
+  if (rr.data.id !== 0 && rr.data.id > 0) {
     req.user = rr.data;
     next();
-  }    
+  }
 };
 /* GET users listing. */
-router.get('/', tokenControl,async(req, res, next) => {
-  res.json({isim:'kerem'});
+router.get('/', tokenControl, async (req, res, next) => {
+  res.json({ isim: 'kerem' });
 
 });
 
-router.get('/download', function(req, res){
+router.get('/download', function (req, res) {
   const file = '1587851977424-Sunum1.pptx';
-  var fileLocation = path.join('./messageFile',file);
+  var fileLocation = path.join('./messageFile', file);
   console.log(fileLocation);
-  res.download(fileLocation, file); 
+  res.download(fileLocation, file);
 });
 
-router.post('/messagefileupload',tokenControl,function(req, res) {
+
+
+router.get('/download/:name', function (req, res) {
+  const file = '1587851977424-Sunum1.pptx';
+  var fileLocation = path.join('./messageFile', file);
+  console.log(fileLocation);
+  res.sendFile(path.join(__dirname, "../messageFile/" + req.params.name));
+});
+
+
+router.post('/messagefileupload', tokenControl, function (req, res) {
 
   messagefileupload(req, res, function (err) {
-         if (err instanceof multer.MulterError) {
-             return res.status(500).json(err)
-         } else if (err) {
-             return res.status(500).json(err)
-         }
+    if (err instanceof multer.MulterError) {
+      return res.status(500).json(err)
+    } else if (err) {
+      return res.status(500).json(err)
+    }
     return res.status(200).send(req.file)
+
+  })
+
+});
+
+router.post('/imageupload', tokenControl, function (req, res) {
+
+  messagefileupload(req, res, function (err) {
+    if (err instanceof multer.MulterError) {
+      return res.status(500).json(err)
+    } else if (err) {
+      return res.status(500).json(err)
+    }
+    return res.sendFile(path.join(__dirname, "../messageFile/" + req.params.name));
 
   })
 
