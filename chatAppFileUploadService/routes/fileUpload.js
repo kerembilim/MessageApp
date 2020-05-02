@@ -9,7 +9,7 @@ const axios = require('axios');
 const path = require('path');
 
 
-
+var fileName = null;
 
 const { Pool, Client } = require('pg')
 
@@ -42,7 +42,8 @@ var messageFileStorage = multer.diskStorage({
     var ss = today.getSeconds();
     var ms = today.getMilliseconds();
     today = dd + '.' + Month + '.' + yyyy + '|' + hh + ':' + mm + ':' + ss + ':' + ms;
-    cb(null, req.user.username + '|' + today + '-' + file.originalname)
+    fileName = req.user.username + '|' + today + '-' + file.originalname.replace(/\s/g, '');
+    cb(null,fileName )
   }
 })
 
@@ -63,7 +64,6 @@ const tokenControl = async (req, res, next) => {
 /* GET users listing. */
 router.get('/', tokenControl, async (req, res, next) => {
   res.json({ isim: 'kerem' });
-
 });
 
 router.get('/download', function (req, res) {
@@ -78,7 +78,6 @@ router.get('/download', function (req, res) {
 router.get('/download/:name', function (req, res) {
   const file = '1587851977424-Sunum1.pptx';
   var fileLocation = path.join('./messageFile', file);
-  console.log(fileLocation);
   res.sendFile(path.join(__dirname, "../messageFile/" + req.params.name));
 });
 
@@ -105,7 +104,7 @@ router.post('/imageupload', tokenControl, function (req, res) {
     } else if (err) {
       return res.status(500).json(err)
     }
-    return res.sendFile(path.join(__dirname, "../messageFile/" + req.params.name));
+    res.json({url: "http://localhost:4010/fileupload/download/" + fileName}) ;
 
   })
 

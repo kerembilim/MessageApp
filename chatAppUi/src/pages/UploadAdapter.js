@@ -1,4 +1,4 @@
-import axios, { post } from 'axios';
+import axios from 'axios';
 
 export default class UploadAdapter {
     constructor(loader) {
@@ -13,16 +13,8 @@ export default class UploadAdapter {
                     const data = new FormData();
                     data.append('file', uploadedFile);
 
-                    const url = 'http://localhost:4010/fileupload/messagefileupload';
-                    const config = {
-                        headers: {
-                            'content-type': 'multipart/form-data',
-                            'Authorization': 'Bearer ' + localStorage.getItem('userToken')
-                        }
-                    }
-
                     axios( {
-                        url: 'http://localhost:4010/fileupload/messagefileupload',
+                        url: 'http://localhost:4010/fileupload/imageupload',
                         method: 'post',
                         data,
                         headers: {
@@ -31,11 +23,11 @@ export default class UploadAdapter {
                         },
                         withCredentials: false
                     } ).then( response => {
-                        console.log(response.status)
                         if ( response.status == 200 ) {
                             console.log('asd');
+                            console.log(response.data);
                             resolve( {
-                                default: 'https://i.insider.com/56dd5464dd08956d4b8b46ac?width=800&format=jpeg'//response.data.url
+                                default: response.data.url
                             } );
                         } else {
                             reject( response.data.message );
