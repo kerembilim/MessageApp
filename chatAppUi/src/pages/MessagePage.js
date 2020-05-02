@@ -180,8 +180,6 @@ export default class MessagePage extends Component {
 
     node.appendChild(textnode);
     document.getElementById("messageArea").appendChild(node);
-
-
   }
 
 

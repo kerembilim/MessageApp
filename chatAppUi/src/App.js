@@ -7,7 +7,8 @@ import LoginModal from './components/LoginModal';
 import NavBar from './components/NavBar';
 
 //pages
-import MessagePage from './pages/MessagePage'
+import MessagePage from './pages/MessagePage';
+import DocumentEdit from './pages/DocumentEdit';
 
 import './App.css';
 import messageBackground from './utilies/messageBackground.jpeg';
@@ -105,7 +106,7 @@ class App extends React.Component {
           <div className="bg-dim full-bg-size" style={{ backgroundImage: `url(${messageBackground})` }}>
 
           <Route path="/message" exact strict component={MessagePage} />
-
+          <Route path="/document" exact strict component={DocumentEdit} />
 					<Route path="/" exact render={
             () => {
               return(<h1>Home page</h1>)
