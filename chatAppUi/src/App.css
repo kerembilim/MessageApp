@@ -38,12 +38,7 @@ body {
 }
 
 .connectList{
-  margin-top: 2%;
-  margin-left: 2%;
-  float:left;
   background: rgba(150, 135, 135, 0.5);
-  width:20%;
-  height: 80%;
   border-radius: 15px;
   border-width: 5px;
   border-style: solid;
