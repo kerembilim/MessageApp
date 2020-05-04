@@ -192,62 +192,69 @@ export default class MessagePage extends Component {
   }
   render() {
     return (
-      <div className="bg-dim" >
-        <div className="connectList" >
-          {this.state.contacts.map(index =>
-            <div key={index.username} className="connect" onClick={() => { this.setState({ messageTarget: index }); document.getElementById('messageArea').innerHTML = ""; }} >
-              <img alt={index.username} src={index.image} style={{ height: 70, width: 70, float: 'left', borderRadius: 50, marginTop: 10, marginBottom: 10, backgroundSize: 'contain' }} />
-              <div>
-                <p style={{ marginLeft: 120, fontSize: 30, marginTop: 5, marginBottom: 0 }} >{index.username}</p>
-                <p style={{ marginLeft: 120, fontSize: 15, marginTop: 20, color: 'green' }} >{index.statu}</p>
-              </div>
+      <div className="bg-dim row" >
+        
+          <div className="col-md-3">
+            <div className="connectList" >
+            </div>
+            {this.state.contacts.map(index =>
+              <div key={index.username} className="connect" onClick={() => { this.setState({ messageTarget: index }); document.getElementById('messageArea').innerHTML = ""; }} >
+                <img alt={index.username} src={index.image} style={{ height: 70, width: 70, float: 'left', borderRadius: 50, marginTop: 10, marginBottom: 10, backgroundSize: 'contain' }} />
+                <div>
+                  <p style={{ marginLeft: 120, fontSize: 30, marginTop: 5, marginBottom: 0 }} >{index.username}</p>
+                  <p style={{ marginLeft: 120, fontSize: 15, marginTop: 20, color: 'green' }} >{index.statu}</p>
+                </div>
 
-            </div>)}
-        </div>
-        <div className="allMessageArea" id='' >
-          {
-            this.state.messageTarget.username ?
-              <div className="messageTarget">
-                <img src={this.state.messageTarget.image} style={{ height: 50, width: 50, float: 'left', borderRadius: 50, marginTop: 10, marginLeft: 10, marginBottom: 10, backgroundSize: 'contain' }} />
-                <div style={{ paddingTop: 10, marginLeft: 100, fontSize: 30 }}>{this.state.messageTarget.username}</div>
-                <div style={{ paddingTop: 10, color: 'green', marginLeft: 110, fontSize: 15 }}>{this.state.messageTarget.statu}</div>
-              </div> : null
-          }
-          <div id='messageArea' >
-            {
-              this.state.messages.map(index => {
-                if (index.target === this.state.messageTarget.username || index.sender === this.state.messageTarget.username) {
-                  this.addMessageArea(index);
+              </div>)}
+          </div>
+          <div className="col-md-9">
+            <div className="allMessageArea" id='' >
+              {
+                this.state.messageTarget.username ?
+                  <div className="messageTarget">
+                    <img src={this.state.messageTarget.image} style={{ height: 50, width: 50, float: 'left', borderRadius: 50, marginTop: 10, marginLeft: 10, marginBottom: 10, backgroundSize: 'contain' }} />
+                    <div style={{ paddingTop: 10, marginLeft: 100, fontSize: 30 }}>{this.state.messageTarget.username}</div>
+                    <div style={{ paddingTop: 10, color: 'green', marginLeft: 110, fontSize: 15 }}>{this.state.messageTarget.statu}</div>
+                  </div> : null
+              }
+              <div id='messageArea' >
+                {
+                  this.state.messages.map(index => {
+                    if (index.target === this.state.messageTarget.username || index.sender === this.state.messageTarget.username) {
+                      this.addMessageArea(index);
+                    }
+                  })
                 }
-              })
+              </div>
+            </div>
+            {
+              this.state.messageTarget.username ?
+                <div>
+                  <input type="text" onKeyUp={this.enterClick} id='messageText' className="message" value={this.state.value} onChange={this.handleChange} />
+                  <input id="btnSend" type="submit" className="button" value="GÖNDER" onClick={() => {
+                    if (this.state.value !== '') {
+                      const message = {
+                        content: this.state.value,
+                        target: this.state.messageTarget.username,
+                        sender: this.state.username,
+                        messageType: 'message'
+                      }
+                      this.sendMessage(message);
+                      this.setState({ value: '' });
+                      document.getElementById('messageArea').innerHTML = "";
+                    }
+
+                  }} />
+
+
+                  <input type="file" onChange={this.onChange} className="button" />
+                  <button type="submit" className="button" onClick={this.onFormSubmit}>Upload</button>
+
+                </div> : null
             }
           </div>
-        </div>
-        {
-          this.state.messageTarget.username ?
-            <div>
-              <input type="text" onKeyUp={this.enterClick} id='messageText' className="message" value={this.state.value} onChange={this.handleChange} />
-              <input id="btnSend" type="submit" className="button" value="GÖNDER" onClick={() => {
-                if (this.state.value !== '') {
-                  const message = {
-                    content: this.state.value,
-                    target: this.state.messageTarget.username,
-                    sender: this.state.username,
-                    messageType: 'message'
-                  }
-                  this.sendMessage(message);
-                  this.setState({ value: '' });
-                  document.getElementById('messageArea').innerHTML = "";
-                }
+      </div>
 
-              }} />
-
-
-              <input type="file" onChange={this.onChange} className="button" />
-              <button type="submit" className="button" onClick={this.onFormSubmit}>Upload</button>
-
-            </div> : null
-        } </div>
     );
   }
 }
