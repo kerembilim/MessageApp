@@ -4,13 +4,13 @@ import ReactModal from 'react-modal';
 export default class FileUploadModal extends Component {
   constructor(props) {
     super(props);
-    this.state = { password: '', username: '' };
+    this.state = { showModal: null, };
   }
   render() {
     return (
       <ReactModal
         ariaHideApp={false}
-        isOpen={this.props.showModal}
+        isOpen={this.state.showModal === null ? this.props.showModal : this.state.showModal}
         contentLabel="Minimal Modal Example"
         style={{
           content: {
@@ -23,10 +23,13 @@ export default class FileUploadModal extends Component {
           }
         }}
       >
-        <p style={{ fontSize: 20 }}>Login</p>
+        <p style={{ fontSize: 20 }}>File Upload</p>
         <hr />
         <input type="file" onChange={this.onChange} className="form-control" />
-                    <button type="submit" className="form-control" onClick={this.onFormSubmit}>Upload</button>
+        <button type="submit" className="form-control" onClick={this.onFormSubmit}>Upload</button>
+        <button type="submit" className="form-control" onClick={()=>{this.setState({showModal:false})}}>Upload</button>
+
+
       </ReactModal>
     );
   }
