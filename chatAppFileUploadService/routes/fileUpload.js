@@ -76,7 +76,7 @@ router.get('/download', function (req, res) {
 
 
 router.get('/download/:name', function (req, res) {
-  const file = '1587851977424-Sunum1.pptx';
+  const file = req.params.name;
   var fileLocation = path.join('./messageFile', file);
   res.sendFile(path.join(__dirname, "../messageFile/" + req.params.name));
 });

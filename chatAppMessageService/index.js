@@ -25,7 +25,8 @@ mongoose.connect("mongodb://localhost/messageAppDB")
       sender: msg.sender,
       target: msg.target,
       date: Date.now(),
-      messageType: msg.messageType
+      messageType: msg.messageType,
+      filename: msg.filename
    });
  
  

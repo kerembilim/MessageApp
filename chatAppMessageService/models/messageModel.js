@@ -5,7 +5,8 @@ var MessageModel = new mongoose.Schema({
     sender: String,
     target: String,
     date: Date,
-    messageType: String
+    messageType: String,
+    filename: String
 });
 
 module.exports = mongoose.model('messages', MessageModel)

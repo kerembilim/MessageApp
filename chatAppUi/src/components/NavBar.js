@@ -8,7 +8,7 @@ export default class componentName extends Component {
                     <h2 className="logo"><a href="">Website Logo</a></h2>
                     <a id="menu-icon">&#9776; Menu</a>
 
-                    <nav className="navbar">
+                    <nav className="navbar" style={{padding:0}}>
                         <ul className="menu">
                             <li><a href="#">Belge Yönetimi</a></li>
                             <li><a href="#">Hesap işlemleri</a></li>
