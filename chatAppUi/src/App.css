@@ -55,7 +55,7 @@ body {
 }
 
 .messageTarget{
-  height: 10%;
+  height: 80px;
   background: #edeef1;
   clear: both;
 }

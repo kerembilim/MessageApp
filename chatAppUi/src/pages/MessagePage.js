@@ -195,10 +195,10 @@ export default class MessagePage extends Component {
 
     node.appendChild(textnode);
     if (message.messageType === 'file') {
-      node.innerHTML = "<img style='height:50px;width:50px;' src='https://img.favpng.com/10/20/25/computer-icons-text-file-symbol-png-favpng-G6B1MG2uDAAPVtEtJ4m0sQc6C.jpg' />" + node.innerHTML;
+      node.innerHTML = "<img style='height:80px;width:80px;' src='https://img.pngio.com/emoji-file-folders-directory-computer-icons-txt-file-png-png-file-folder-900_900.jpg' />" + node.innerHTML;
     }
-    
-    
+
+
     document.getElementById("messageArea").appendChild(node);
   }
 
@@ -249,14 +249,24 @@ export default class MessagePage extends Component {
         </div>
         <div className="col-md-9">
           <div className="allMessageArea" id='' >
+
+
+
             {
               this.state.messageTarget.username ?
-                <div className="messageTarget">
-                  <img src={this.state.messageTarget.image} style={{ height: 50, width: 50, float: 'left', borderRadius: 50, marginTop: 10, marginLeft: 10, marginBottom: 10, backgroundSize: 'contain' }} />
-                  <div style={{ paddingTop: 10, marginLeft: 100, fontSize: 30 }}>{this.state.messageTarget.username}</div>
-                  <div style={{ paddingTop: 10, color: 'green', marginLeft: 110, fontSize: 15 }}>{this.state.messageTarget.statu}</div>
-                </div> : null
+                <div className="row">
+                  <div className="col-md-12">
+                    <div className="" style={{ background: '#edeef1', }}>
+                      <img src={this.state.messageTarget.image} style={{ height: 50, width: 50, float: 'left', borderRadius: 50, marginTop: 10, marginLeft: 10, marginBottom: 10, backgroundSize: 'contain' }} />
+                      <div style={{ paddingTop: 10, marginLeft: 100, fontSize: 30 }}>{this.state.messageTarget.username}</div>
+                      <div style={{ paddingTop: 10, color: 'green', marginLeft: 110, fontSize: 15 }}>{this.state.messageTarget.statu}</div>
+                    </div>
+                  </div>
+                </div>
+                : null
             }
+
+
             <div id='messageArea' >
               {
                 this.state.messages.map(index => {
@@ -266,6 +276,8 @@ export default class MessagePage extends Component {
                 })
               }
             </div>
+
+
           </div>
           {
             this.state.messageTarget.username ?
