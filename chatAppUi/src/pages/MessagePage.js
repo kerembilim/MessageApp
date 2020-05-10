@@ -152,7 +152,7 @@ export default class MessagePage extends Component {
       if (message.messageType === 'file') {
         node.onclick = function () {
           console.log(message);
-          fetch('http://localhost:4010/fileupload/download/'+message.filename)
+          fetch('http://localhost:4010/fileupload/download/' + message.filename)
             .then(response => {
               response.blob().then(blob => {
                 let url = window.URL.createObjectURL(blob);
@@ -194,6 +194,11 @@ export default class MessagePage extends Component {
     textnode = document.createTextNode(message.sender + ': ' + message.content);
 
     node.appendChild(textnode);
+    if (message.messageType === 'file') {
+      node.innerHTML = "<img style='height:50px;width:50px;' src='https://img.favpng.com/10/20/25/computer-icons-text-file-symbol-png-favpng-G6B1MG2uDAAPVtEtJ4m0sQc6C.jpg' />" + node.innerHTML;
+    }
+    
+    
     document.getElementById("messageArea").appendChild(node);
   }
 
