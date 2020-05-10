@@ -14,6 +14,10 @@ import './App.css';
 import messageBackground from './utilies/messageBackground.jpeg';
 
 
+import { connect } from 'react-redux';
+import { updateUser, getUsers } from '../src/actions/user-actions';
+
+
 class App extends React.Component {
   socket = null;
   list = [];
@@ -26,9 +30,11 @@ class App extends React.Component {
     this.handleCloseModal = this.handleCloseModal.bind(this);
     this.loginControl = this.loginControl.bind(this);
     this.login = this.login.bind(this);
+    this.onUpdateUser = this.onUpdateUser.bind(this);
   }
 
   async componentDidMount() {
+    this.props.onGetUsers();
     await this.loginControl();
   }
 
@@ -49,13 +55,13 @@ class App extends React.Component {
       var self = this;
       await axios.post('http://localhost:5000/users/loginControl', {
       }, {
-          headers: { Authorization: "Bearer " + localStorage.getItem('userToken') }
-        }).then(async function (response) {
-          if (response.data.result === 'basarili') {
-            await self.setState({ showModal: false });
-            await self.setState({ username: response.data.username });
-          }
-        });
+        headers: { Authorization: "Bearer " + localStorage.getItem('userToken') }
+      }).then(async function (response) {
+        if (response.data.result === 'basarili') {
+          await self.setState({ showModal: false });
+          await self.setState({ username: response.data.username });
+        }
+      });
     }
 
   }
@@ -80,6 +86,10 @@ class App extends React.Component {
     })
   }
 
+  onUpdateUser(){
+		this.props.onUpdateUser('Ahmet');
+	}
+
 
   myFunction() {
     var x = document.getElementById("mySelect").value;
@@ -90,28 +100,31 @@ class App extends React.Component {
     return (
       <Router>
         <div className="full-width-div">
-          <NavBar/>
+          <NavBar />
 
-          
+
 
           <LoginModal
-            showModal = {this.state.showModal}
-            onChangeUserName = {this.handleChangeUsername}
-            onChangePassword = {this.handleChangePass}
-            login = {this.login}
+            showModal={this.state.showModal}
+            onChangeUserName={this.handleChangeUsername}
+            onChangePassword={this.handleChangePass}
+            login={this.login}
           />
 
-					
+
 
           <div className="bg-dim full-bg-size" style={{ backgroundImage: `url(${messageBackground})` }}>
 
-          <Route path="/message" exact strict component={MessagePage} />
-          <Route path="/document" exact strict component={DocumentPage} />
-					<Route path="/" exact render={
-            () => {
-              return(<h1>Home page</h1>)
-            }
-          } />          
+
+            <h2>{this.props.user}</h2>
+            <button onClick={this.onUpdateUser}>Change the name</button>
+            <Route path="/message" exact strict component={MessagePage} />
+            <Route path="/document" exact strict component={DocumentPage} />
+            <Route path="/" exact render={
+              () => {
+                return (<h1>Home page</h1>)
+              }
+            } />
           </div>
 
 
@@ -126,7 +139,21 @@ class App extends React.Component {
 }
 
 
+const mapStateToProps = (state, props) => {
+  return {
+    ...state,
+    myCount: props.count + 2
+  };
+};
+
+const mapDispatchToProps = {
+  onUpdateUser: updateUser,
+  onGetUsers: getUsers
+};
 
 
 
-export default App;
+
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
