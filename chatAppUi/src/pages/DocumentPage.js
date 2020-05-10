@@ -2,19 +2,36 @@ import React, { Component } from 'react';
 import CKEditor from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
+
+import axios, { post } from 'axios';
+
 import UploadAdapter from './UploadAdapter';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import DocumentListView from '../components/DocumentListView';
 export default class componentName extends Component {
 
     state = {
-        contentData: null
+        contentData: null,
+        documentList: []
+    }
+
+    
+
+    componentDidMount(){
+        var self = this;
+        axios.get('http://localhost:4010/document/getdocumentstitle/', {
+        headers: { Authorization: "Bearer " + localStorage.getItem('userToken') }
+      }).then(function (response) {
+          self.setState({documentList:response.data})
+      })
     }
     render() {
         return (
             <div className="row" style={{padding:'1%'}}>
                 <div className="col-md-2">
-                    <DocumentListView />
+                    <DocumentListView
+                        documentList={this.state.documentList}
+                     />
                 </div>
                 <div className="col-md-10">
                     <CKEditor
@@ -25,6 +42,7 @@ export default class componentName extends Component {
                                 console.log(loader.file);
                                 return new UploadAdapter(loader);
                             };
+                            editor.isReadOnly=true
                         }}
 
                         onChange={(event, editor) => {

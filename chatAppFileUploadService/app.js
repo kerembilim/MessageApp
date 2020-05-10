@@ -6,6 +6,7 @@ var logger = require('morgan');
 var cors = require('cors');
 
 var fileRouter = require('./routes/fileUpload');
+var documentRouter = require('./routes/document');
 var app = express();
 
 // view engine setup
@@ -21,6 +22,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 
 app.use('/fileupload', fileRouter);
+app.use('/document', documentRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -66,15 +66,6 @@ router.get('/', tokenControl, async (req, res, next) => {
   res.json({ isim: 'kerem' });
 });
 
-router.get('/download', function (req, res) {
-  const file = '1587851977424-Sunum1.pptx';
-  var fileLocation = path.join('./messageFile', file);
-  console.log(fileLocation);
-  res.download(fileLocation, file);
-});
-
-
-
 router.get('/download/:name', function (req, res) {
   const file = req.params.name;
   var fileLocation = path.join('./messageFile', file);
@@ -83,7 +74,6 @@ router.get('/download/:name', function (req, res) {
 
 
 router.post('/messagefileupload', tokenControl, function (req, res) {
-
   messagefileupload(req, res, function (err) {
     if (err instanceof multer.MulterError) {
       return res.status(500).json(err)
