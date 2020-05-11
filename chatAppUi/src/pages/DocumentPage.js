@@ -5,10 +5,14 @@ import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 import axios, { post } from 'axios';
 
+
+import { connect } from 'react-redux';
+import { updateUser, getUsers } from '../../src/actions/user-actions';
+
 import UploadAdapter from './UploadAdapter';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import DocumentListView from '../components/DocumentListView';
-export default class componentName extends Component {
+class DocumentPage extends Component {
 
     state = {
         contentData: null,
@@ -36,7 +40,7 @@ export default class componentName extends Component {
                 <div className="col-md-10">
                     <CKEditor
                         editor={ClassicEditor}
-                        data="<p>Hello from CKEditor 5!</p>"
+                        data={this.props.document}
                         onInit={editor => {
                             editor.plugins.get('FileRepository').createUploadAdapter = function (loader) {
                                 console.log(loader.file);
@@ -66,3 +70,18 @@ export default class componentName extends Component {
         );
     }
 }
+
+
+const mapStateToProps = (state, props) => {
+    return {
+      ...state,
+      myCount: props.count + 2
+    };
+  };
+  
+  const mapDispatchToProps = {
+    onUpdateUser: updateUser,
+    onGetUsers: getUsers
+  };
+
+  export default connect(mapStateToProps, mapDispatchToProps)(DocumentPage);

@@ -89,14 +89,14 @@ router.get('/getdocumentstitle', tokenControl, async (req, res, next) => {//user
 
 
 
-router.get('/getdocumentdetail', tokenControl, async (req, res, next) => {// yetkisi var mı diye kontol ettikten sonra detaylar gönderilecek 
+router.get('/getdocumentdetail/:id', tokenControl, async (req, res, next) => {// yetkisi var mı diye kontol ettikten sonra detaylar gönderilecek 
     const client = createClient();
     client.connect(err => {
         if (err) {
             console.error('connection error', err.stack)
         }
     });
-    const resDb = await client.query('select * from document  inner join documentuser on documentuser.documentid = document.id where documentuser.userid = $1 ', [req.user.id]);
+    const resDb = await client.query('select * from document  inner join documentuser on documentuser.documentid = document.id where document.id = $1 ', [req.params.id]);
 
     await client.end()
     res.json(resDb.rows[0]);
