@@ -212,20 +212,43 @@ router.post('/usercontrol',  async(req, res, next) =>{
       }
       else{
         const client = createClient();
-        client.connect(err => {
+        await client.connect(err => {
           if (err) {
             console.error('connection error', err.stack)
           }
         });
-        const resDb = await client.query('select * from users where username = $1 and password = $2', [data.user.username,data.user.password]);
-        await client.end()
+        let resDb = await client.query('select * from users where username = $1 and password = $2', [data.user.username,data.user.password]);
+       
 
         if(resDb.rows == null || resDb.rows.length <=0 ){
           res.json({Error:'User not found'});
         }
         else{
-          res.json(resDb.rows[0]);
+          
+          let response = resDb.rows[0];
+          let id = resDb.rows[0].id;
+          resDb =  await client.query('select workgroupid from workgroupuser where userid = $1', [id]);
+          response.workgroup = resDb.rows;
+          
+
+
+          resDb= await client.query('select roleid from roleuser where userid = $1', [id]);
+          response.role = resDb.rows;
+          
+
+
+
+          resDb= await client.query('select departmantid from departmantuser where userid = $1', [id]);
+          response.departmant = resDb.rows;
+
+
+          await client.end()
+        
+          res.json(response);
         }
+
+
+        
       }
         
     })

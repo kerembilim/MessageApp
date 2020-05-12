@@ -116,13 +116,13 @@ class App extends React.Component {
           <div className="bg-dim full-bg-size" style={{ backgroundImage: `url(${messageBackground})` }}>
 
 
-            <h2>{this.props.user}</h2>
-            <button onClick={this.onUpdateUser}>Change the name</button>
+            
             <Route path="/message" exact strict component={MessagePage} />
             <Route path="/document" exact strict component={DocumentPage} />
             <Route path="/" exact render={
               () => {
-                return (<h1>Home page</h1>)
+                return (<div><h2>{this.props.user}</h2>
+                  <button onClick={this.onUpdateUser}>Change the name</button></div>)
               }
             } />
           </div>

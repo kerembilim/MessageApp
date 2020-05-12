@@ -28,7 +28,8 @@ export function getDocument(id){
                 await axios.get('http://localhost:4010/document/getdocumentdetail/' + id, {
                   headers: { Authorization: "Bearer " + localStorage.getItem('userToken') }
                 }).then(function (response) {
-                    dispatch(updateDocument(response.data.content));
+					console.log(response);
+                    dispatch(updateDocument(response.data));
                 })
               }
 			
