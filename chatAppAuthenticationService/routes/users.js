@@ -119,24 +119,6 @@ router.post('/loginControl',async(req, res, next) => {
 
 
 router.get('/getContacts/:username',tokenControl,async(req, res) => {
-  const contacts = [
-    {
-      username:'Siri',
-      statu:'online',
-      image:'https://images.unsplash.com/photo-1525450280520-7d542a86e065?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1350&q=80'
-    },
-    {
-      username:'Alexa',
-      statu:'online',
-      image:'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60'
-    },
-    {
-      username:'Vision',
-      statu:'online',
-      image:'https://i.pinimg.com/originals/12/75/4a/12754ac600a5806ac7e401e776382952.jpg'
-    }
-  ];
-
   const client = createClient();
   try{
     client.connect(err => {
@@ -144,13 +126,25 @@ router.get('/getContacts/:username',tokenControl,async(req, res) => {
         console.error('connection error', err.stack) 
       }
     });
-    console.log(req.query.username + ' qasda');
-    const resDb = await client.query("SELECT username,'online' statu,photourl image FROM USERS WHERE username <> $1", [req.params.username]);
+    
+    let resDb = await client.query("SELECT username,'online' statu,photourl image FROM USERS WHERE username <> $1", [req.params.username]);
+    let persons=[];
+    let response = {};
+    let workgroups = [];
+    let departmants = [];
     if(resDb.rows == null || resDb.rows.length <=0 ){
       res.json({Error:'User not found'});
     }
     else{
-      res.json(resDb.rows);
+      persons.push(...resDb.rows);
+      let resDb2 = await client.query("SELECT workgroup.name from workgroup left join workgroupuser on workgroup.id = workgroupuser.workgroupid left join users on workgroupuser.userid = users.id where users.username = $1", [req.params.username]);
+      workgroups.push(...resDb2.rows);
+      let resDb3 = await client.query("SELECT departmant.name,departmant.photo from departmant left join departmantuser on departmant.id = departmantuser.departmantid left join users on departmantuser.userid = users.id where users.username = $1", [req.params.username]);
+      departmants.push(...resDb3.rows);
+      response.persons = persons;
+      response.workgroups = workgroups;
+      response.departmants = departmants;
+      res.json(response);
     }
   }
   catch(err){

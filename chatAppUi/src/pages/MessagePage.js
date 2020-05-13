@@ -10,7 +10,7 @@ export default class MessagePage extends Component {
   list = [];
   constructor(props) {
     super(props);
-    this.state = { value: '', password: '', showModal: true, username: '', contacts: [], messageTarget: {}, messages: [], file: null };
+    this.state = { value: '', password: '', showModal: true, username: '', persons: [], departmants: [], workgroups: [], messageTarget: {}, messages: [], file: null };
     this.handleChange = this.handleChange.bind(this);
     this.sendMessage = this.sendMessage.bind(this);
     this.getContacts = this.getContacts.bind(this);
@@ -18,6 +18,7 @@ export default class MessagePage extends Component {
     this.addMessageArea = this.addMessageArea.bind(this);
     this.loginControl = this.loginControl.bind(this);
     this.onFormSubmit = this.onFormSubmit.bind(this)
+    this.initSocketConnection = this.initSocketConnection.bind(this)
     this.onChange = this.onChange.bind(this)
     this.fileUpload = this.fileUpload.bind(this)
   }
@@ -26,8 +27,8 @@ export default class MessagePage extends Component {
     //this.state.username = localStorage.get('');
     await this.loginControl();
     await this.getMessages();
-    await this.initSocketConnection();
     await this.getContacts();
+    await this.initSocketConnection();
   }
 
   loginControl = async () => {
@@ -46,13 +47,15 @@ export default class MessagePage extends Component {
   }
 
 
-  getContacts() {
+  getContacts = async () => {
     if (localStorage.getItem('userToken') !== null && localStorage.getItem('userToken') !== '') {
       var self = this;
-      axios.get('http://localhost:5000/users/getContacts' + '/' + this.state.username, {
+      await axios.get('http://localhost:5000/users/getContacts' + '/' + this.state.username, {
         headers: { Authorization: "Bearer " + localStorage.getItem('userToken') }
-      }).then(function (response) {
-        self.setState({ contacts: response.data });
+      }).then(async function (response) {
+        await self.setState({ persons: response.data.persons });
+        await self.setState({ workgroups: response.data.workgroups });
+        await self.setState({ departmants: response.data.departmants });
         self.list = response.data;
       })
     }
@@ -78,7 +81,6 @@ export default class MessagePage extends Component {
 
   initSocketConnection() {
     var self = this;
-
     this.socket = io.connect('http://localhost:4000');
     this.socket.on(this.state.username, async (msg) => {
       let newMessages = self.state.messages;
@@ -86,6 +88,18 @@ export default class MessagePage extends Component {
       document.getElementById('messageArea').innerHTML = "";
       self.setState({ messages: newMessages });
     });
+
+    for (var i = 0; i < this.state.departmants.length; i++) {
+      this.socket.on(this.state.departmants[i].name, async (msg) => {
+        if (msg.sender !== this.state.username) {
+          let newMessages = self.state.messages;
+          newMessages.push(msg);
+          document.getElementById('messageArea').innerHTML = "";
+          self.setState({ messages: newMessages });
+        }
+      });
+    }
+
   }
 
   onFormSubmit(e) {
@@ -144,6 +158,7 @@ export default class MessagePage extends Component {
 
   addMessageArea(message) {
     var css, head, style, node;
+    console.log(message);
     if (message.sender === this.state.username) {
       css = 'mymessage { background: #baecba; float:right; clear: both;padding:2%; margin:1%;max-width:300px; word-wrap:break-word;border-radius:5px; }';
       head = document.head || document.getElementsByTagName('head')[0];
@@ -237,7 +252,7 @@ export default class MessagePage extends Component {
         <div className="col-md-3">
           <div className="connectList">
           </div>
-          {this.state.contacts.map(index =>
+          {this.state.persons.map(index =>
             <div key={index.username} className="connect" onClick={() => { this.setState({ messageTarget: index }); document.getElementById('messageArea').innerHTML = ""; }} >
               <img alt={index.username} src={index.image} style={{ height: 70, width: 70, float: 'left', borderRadius: 50, marginTop: 10, marginBottom: 10, backgroundSize: 'contain' }} />
               <div>
@@ -246,6 +261,18 @@ export default class MessagePage extends Component {
               </div>
 
             </div>)}
+          <div style={{ color: 'white', fontSize: '40px' }}>
+            <b>departmants</b>
+          </div>
+          {this.state.departmants.map(index =>
+            <div key={index.name} className="connect" onClick={() => { this.setState({ messageTarget: index }); document.getElementById('messageArea').innerHTML = ""; }} >
+              <img alt={index.name} src={index.photo} style={{ height: 70, width: 70, float: 'left', borderRadius: 50, marginTop: 10, marginBottom: 10, backgroundSize: 'contain' }} />
+              <div>
+                <p style={{ marginLeft: 120, fontSize: 30, marginTop: 5, marginBottom: 0 }} >{index.name}</p>
+              </div>
+
+            </div>)}
+          <hr />
         </div>
         <div className="col-md-9">
           <div className="allMessageArea" id='' >
@@ -253,13 +280,13 @@ export default class MessagePage extends Component {
 
 
             {
-              this.state.messageTarget.username ?
+              this.state.messageTarget.username || this.state.messageTarget.name ?
                 <div className="row">
                   <div className="col-md-12">
                     <div className="" style={{ background: '#edeef1', }}>
-                      <img src={this.state.messageTarget.image} style={{ height: 50, width: 50, float: 'left', borderRadius: 50, marginTop: 10, marginLeft: 10, marginBottom: 10, backgroundSize: 'contain' }} />
-                      <div style={{ paddingTop: 10, marginLeft: 100, fontSize: 30 }}>{this.state.messageTarget.username}</div>
-                      <div style={{ paddingTop: 10, color: 'green', marginLeft: 110, fontSize: 15 }}>{this.state.messageTarget.statu}</div>
+                      <img src={this.state.messageTarget.image || this.state.messageTarget.photo} style={{ height: 50, width: 50, float: 'left', borderRadius: 50, marginTop: 10, marginLeft: 10, marginBottom: 10, backgroundSize: 'contain' }} />
+                      <div style={{ paddingTop: 10, marginLeft: 100, fontSize: 30 }}>{this.state.messageTarget.username || this.state.messageTarget.name}</div>
+                      <div style={{ paddingTop: 10, color: 'green', marginLeft: 110, fontSize: 15 }}>{this.state.messageTarget.statu || ''}</div>
                     </div>
                   </div>
                 </div>
@@ -270,7 +297,7 @@ export default class MessagePage extends Component {
             <div id='messageArea' >
               {
                 this.state.messages.map(index => {
-                  if (index.target === this.state.messageTarget.username || index.sender === this.state.messageTarget.username) {
+                  if (index.target === this.state.messageTarget.username || index.sender === this.state.messageTarget.username || index.target === this.state.messageTarget.name) {
                     this.addMessageArea(index);
                   }
                 })
@@ -280,7 +307,7 @@ export default class MessagePage extends Component {
 
           </div>
           {
-            this.state.messageTarget.username ?
+            this.state.messageTarget.username || this.state.messageTarget.name ?
               <div className="col-md-12">
                 <div className="row" style={{ marginTop: '20px' }}>
                   <div className="col-md-10">
@@ -296,7 +323,7 @@ export default class MessagePage extends Component {
                               if (this.state.value !== '') {
                                 const message = {
                                   content: this.state.value,
-                                  target: this.state.messageTarget.username,
+                                  target: this.state.messageTarget.username || this.state.messageTarget.name,
                                   sender: this.state.username,
                                   messageType: 'message'
                                 }
