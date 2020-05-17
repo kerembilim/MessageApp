@@ -68,6 +68,7 @@ export default class MessagePage extends Component {
         username: this.state.username
       }
     }).then(async function (response) {
+      console.log(response.data);
       await self.setState({ messages: response.data });
     })
   }
