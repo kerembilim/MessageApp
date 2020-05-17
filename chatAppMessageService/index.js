@@ -43,6 +43,7 @@ app.use(cors());
 app.use(bodyParser.json())
 
 app.get('/getmessages',(req,res)=>{
+  console.log('asdasdas');
   MessageModel.find({$or: [ { target:req.query.username }, { sender:req.query.username }]}).sort({_id:1}).limit(500).exec(function(err, leads){
     res.send(leads);
     });

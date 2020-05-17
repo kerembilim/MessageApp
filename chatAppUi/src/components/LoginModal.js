@@ -1,19 +1,65 @@
 import React, { Component } from 'react';
+import axios from 'axios';
 
 import '../App.css';
 import ReactModal from 'react-modal';
 
 export default class componentName extends Component {
-    constructor(props) {
-        super(props);
-        this.state = { password: '', username: '' };
+  constructor(props) {
+    super(props);
+    this.state = { password: '', username: '', showModal: true };
+    this.handleChangeUsername = this.handleChangeUsername.bind(this);
+    this.handleChangePassword = this.handleChangePassword.bind(this);
+    this.login = this.login.bind(this);
+  }
+
+  componentDidMount() {
+    this.loginControl();
+  }
+
+  handleChangeUsername(event) {
+    this.setState({ username: event.target.value });
+  }
+
+  handleChangePassword(event) {
+    this.setState({ password: event.target.value });
+    console.log(this.state.password)
+  }
+
+  loginControl = async () => {
+
+    var self = this;
+    await axios.post('http://localhost:5000/users/loginControl', {
+    }, {
+      headers: { Authorization: "Bearer " + localStorage.getItem('userToken') }
+    }).then(async function (response) {
+      if (response.data.result === 'basarili') {
+        await self.setState({ showModal: false });
       }
+    });
+  }
+
+  login() {
+    var self = this;
+    axios.post('http://localhost:5000/users/login', {
+      username: this.state.username,
+      password: this.state.password
+    }).then(function (response) {
+      if (response.data.result === 'basarili') {
+        self.setState({ showModal: false });
+        localStorage.setItem("userToken", response.data.token);
+        localStorage.setItem("userName", response.data.username);
+        window.location.reload();
+      }
+    })
+  }
+
 
   render() {
     return (
-        <ReactModal
+      <ReactModal
         ariaHideApp={false}
-        isOpen={this.props.showModal}
+        isOpen={this.state.showModal}
         contentLabel="Minimal Modal Example"
         style={{
           content: {
@@ -28,12 +74,12 @@ export default class componentName extends Component {
       >
         <p style={{ fontSize: 20 }}>Login</p>
         <hr />
-        <input type="text" style={{ width: 250, height: 30, borderRadius: 15, textIndent: 30, marginLeft: 20 }} value={this.state.username} onChange={this.props.onChangeUserName} />
+        <input type="text" style={{ width: 250, height: 30, borderRadius: 15, textIndent: 30, marginLeft: 20 }} value={this.state.username} onChange={this.handleChangeUsername} />
         <br />
         <br />
-        <input type="password" style={{ width: 250, height: 30, borderRadius: 15, textIndent: 30, marginLeft: 20 }} value={this.state.password} onChange={this.props.onChangePassword} />
+        <input type="password" style={{ width: 250, height: 30, borderRadius: 15, textIndent: 30, marginLeft: 20 }} value={this.state.password} onChange={this.handleChangePassword} />
         <br />
-        <input type="submit" style={{ float: 'right' }} value="GÖNDER" onClick={this.props.login} />
+        <input type="submit" style={{ float: 'right' }} value="GÖNDER" onClick={this.login} />
       </ReactModal>
     );
   }

@@ -25,21 +25,12 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = { value: '', password: '', showModal: true, username: '', contacts: [], messageTarget: {}, messages: [], file: null };
-    this.handleChangeUsername = this.handleChangeUsername.bind(this);
-    this.handleChangePass = this.handleChangePass.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
-    this.loginControl = this.loginControl.bind(this);
-    this.login = this.login.bind(this);
     this.onUpdateUser = this.onUpdateUser.bind(this);
   }
 
   async componentDidMount() {
     this.props.onGetUsers();
-    await this.loginControl();
-  }
-
-  handleChangeUsername(event) {
-    this.setState({ username: event.target.value });
   }
 
   handleChangePass(event) {
@@ -47,43 +38,10 @@ class App extends React.Component {
   }
 
 
-  loginControl = async () => {
-    if (localStorage.getItem('userToken') == null || localStorage.getItem('userToken') == '') {
-      this.login()
-    }
-    else {
-      var self = this;
-      await axios.post('http://localhost:5000/users/loginControl', {
-      }, {
-        headers: { Authorization: "Bearer " + localStorage.getItem('userToken') }
-      }).then(async function (response) {
-        if (response.data.result === 'basarili') {
-          await self.setState({ showModal: false });
-          await self.setState({ username: response.data.username });
-        }
-      });
-    }
-
-  }
+  
 
   handleCloseModal() {
     this.setState({ showModal: false });
-  }
-
-  login() {
-    var self = this;
-    axios.post('http://localhost:5000/users/login', {
-      username: this.state.username,
-      password: this.state.password
-    }).then(function (response) {
-      if (response.data.result === 'basarili') {
-        self.setState({ showModal: false });
-        localStorage.setItem("userToken", response.data.token);
-        localStorage.setItem("userName", response.data.username);
-        self.setState({ username: response.data.username });
-        window.location.reload()
-      }
-    })
   }
 
   onUpdateUser(){

@@ -84,8 +84,9 @@ router.post('/loginControl',async(req, res, next) => {
     const bearerToken = bearer[1];
     req.token = bearerToken;
     jwt.verify(bearerToken,config.jwtSecretKey,async (err,data)=>{
+
       if(err){
-        res.sendStatus(403).send({ error: 'Invalid Token.' });
+        res.json({error:'token is wrong'});
       }
       else{
         const client = createClient();
