@@ -10,7 +10,7 @@ export default class MessagePage extends Component {
   list = [];
   constructor(props) {
     super(props);
-    this.state = { value: '', password: '', showModal: true, username: '', persons: [], departmants: [], workgroups: [], messageTarget: {}, messages: [], file: null };
+    this.state = { value: '', password: '', showModal: true, username: '', persons: [], departmants: [], workgroups: [], messageTarget: {}, messages: [], file: null, messageType:null };
     this.handleChange = this.handleChange.bind(this);
     this.sendMessage = this.sendMessage.bind(this);
     this.getContacts = this.getContacts.bind(this);
@@ -68,7 +68,6 @@ export default class MessagePage extends Component {
         username: this.state.username
       }
     }).then(async function (response) {
-      console.log(response.data);
       await self.setState({ messages: response.data });
     })
   }
@@ -84,6 +83,7 @@ export default class MessagePage extends Component {
     var self = this;
     this.socket = io.connect('http://localhost:4000');
     this.socket.on(this.state.username, async (msg) => {
+      console.log(msg)
       let newMessages = self.state.messages;
       newMessages.push(msg);
       document.getElementById('messageArea').innerHTML = "";
@@ -92,6 +92,7 @@ export default class MessagePage extends Component {
 
     for (var i = 0; i < this.state.departmants.length; i++) {
       this.socket.on(this.state.departmants[i].name, async (msg) => {
+        console.log(msg)
         if (msg.sender !== this.state.username) {
           let newMessages = self.state.messages;
           newMessages.push(msg);
@@ -107,7 +108,6 @@ export default class MessagePage extends Component {
     e.preventDefault() // Stop form submit
     document.getElementById('myForm').style.display = "none";
     this.fileUpload(this.state.file).then((response) => {
-      console.log(response.data);
       const message = {
         content: response.data.originalname,
         target: this.state.messageTarget.username,
@@ -158,8 +158,8 @@ export default class MessagePage extends Component {
   }
 
   addMessageArea(message) {
+    console.log(this.state.messageType)
     var css, head, style, node;
-    console.log(message);
     if (message.sender === this.state.username) {
       css = 'mymessage { background: #baecba; float:right; clear: both;padding:2%; margin:1%;max-width:300px; word-wrap:break-word;border-radius:5px; }';
       head = document.head || document.getElementsByTagName('head')[0];
@@ -254,7 +254,7 @@ export default class MessagePage extends Component {
           <div className="connectList">
           </div>
           {this.state.persons.map(index =>
-            <div key={index.username} className="connect" onClick={() => { this.setState({ messageTarget: index }); document.getElementById('messageArea').innerHTML = ""; }} >
+            <div key={index.username} className="connect" onClick={() => { this.setState({ messageTarget: index,messageType:'chat' }); document.getElementById('messageArea').innerHTML = ""; }} >
               <img alt={index.username} src={index.image} style={{ height: 70, width: 70, float: 'left', borderRadius: 50, marginTop: 10, marginBottom: 10, backgroundSize: 'contain' }} />
               <div>
                 <p style={{ marginLeft: 120, fontSize: 30, marginTop: 5, marginBottom: 0 }} >{index.username}</p>
@@ -266,7 +266,7 @@ export default class MessagePage extends Component {
             <b>departmants</b>
           </div>
           {this.state.departmants.map(index =>
-            <div key={index.name} className="connect" onClick={() => { this.setState({ messageTarget: index }); document.getElementById('messageArea').innerHTML = ""; }} >
+            <div key={index.name} className="connect" onClick={async() => {document.getElementById('messageArea').innerHTML = "";  await this.setState({ messageTarget: index,messageType:'group' }); }} >
               <img alt={index.name} src={index.photo} style={{ height: 70, width: 70, float: 'left', borderRadius: 50, marginTop: 10, marginBottom: 10, backgroundSize: 'contain' }} />
               <div>
                 <p style={{ marginLeft: 120, fontSize: 30, marginTop: 5, marginBottom: 0 }} >{index.name}</p>
@@ -281,7 +281,7 @@ export default class MessagePage extends Component {
 
 
             {
-              this.state.messageTarget.username || this.state.messageTarget.name ?
+              this.state.messageTarget.username || this.state.messageTarget ?
                 <div className="row">
                   <div className="col-md-12">
                     <div className="" style={{ background: '#edeef1', }}>
@@ -298,7 +298,8 @@ export default class MessagePage extends Component {
             <div id='messageArea' >
               {
                 this.state.messages.map(index => {
-                  if (index.target === this.state.messageTarget.username || index.sender === this.state.messageTarget.username || index.target === this.state.messageTarget.name) {
+                  if (((index.target === this.state.username && index.sender === this.state.messageTarget.username) || 
+                  (index.sender === this.state.username && index.target === this.state.messageTarget.username )) || (index.target === this.state.messageTarget.name && this.state.messageType === 'group')) {
                     this.addMessageArea(index);
                   }
                 })
