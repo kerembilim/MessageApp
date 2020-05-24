@@ -179,6 +179,27 @@ router.get('/getContacts/:username', tokenControl, async (req, res) => {
 
 });
 
+router.get('/getdocumentfiltertypedata/:filtertype', tokenControl, async (req, res, next) => {
+  const client = createClient();
+      client.connect(err => {
+          if (err) {
+              console.error('connection error', err.stack)
+          }
+      });
+      let resDb = null;
+      if(req.params.filtertype === 'user'){
+          resDb =  await client.query('select id,username from users');
+      }
+      else if(req.params.filtertype === 'department'){
+        resDb =  await client.query('select id,name from departmant');
+      }
+      else{
+        resDb =  await client.query('select id,name from workgroup');
+      }
+      await client.end()
+      res.json(resDb.rows)
+})
+
 
 router.post('/login', async (req, res, next) => {
   const client = createClient();

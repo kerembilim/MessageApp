@@ -3,7 +3,7 @@ import axios from 'axios';
 export const UPDATE_DOCUMENT = 'UPDATE_DOCUMENT';
 export const GET_DOCUMENT_ERROR = 'GET_DOCUMENT_ERROR';
 
-export function updateDocument(newDocument){
+export function updateDocument(newDocument) {
 	return {
 		type: UPDATE_DOCUMENT,
 		payload: {
@@ -12,7 +12,7 @@ export function updateDocument(newDocument){
 	}
 }
 
-export function showError(){
+export function showError() {
 	return {
 		type: GET_DOCUMENT_ERROR,
 		payload: {
@@ -21,20 +21,37 @@ export function showError(){
 	}
 }
 
-export function getDocument(id){
+export function getDocument(id) {
 	return async dispatch => {
-		try{
+		try {
 			if (localStorage.getItem('userToken') !== null && localStorage.getItem('userToken') !== '') {
-                await axios.get('http://localhost:4010/document/getdocumentdetail/' + id, {
-                  headers: { Authorization: "Bearer " + localStorage.getItem('userToken') }
-                }).then(function (response) {
+				await axios.get('http://localhost:4010/document/getdocumentdetail/' + id, {
+					headers: { Authorization: "Bearer " + localStorage.getItem('userToken') }
+				}).then(function (response) {
 					console.log(response);
-                    dispatch(updateDocument(response.data));
-                })
-              }
-			
-		}catch (e) {
+					dispatch(updateDocument(response.data));
+				})
+			}
+
+		} catch (e) {
 			dispatch(showError());
 		}
+	}
+}
+
+export function createDocument() {
+	return async dispatch => {
+		let document = {
+			"id":-1,
+			"createddate": null,
+			"content": "3310",
+			"description": "",
+			"title": "",
+			"filtertype": null,
+			"createruserid": null,
+			"parenttitleid": null,
+			"canedit": true
+		}
+		dispatch(updateDocument(document));
 	}
 }

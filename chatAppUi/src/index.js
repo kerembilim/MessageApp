@@ -10,11 +10,13 @@ import { Provider } from 'react-redux';
 import userReducer from '../src/reducers/userReducers';
 import productReducer from '../src/reducers/productReducers';
 import documentReducer from '../src/reducers/documentReducers';
+import documentFilterDataReducer from '../src/reducers/documentFilterDataReducer';
 
 const rootReducer = combineReducers({
 	products: productReducer,
 	user: userReducer,
 	document: documentReducer,
+	documentFilterData : documentFilterDataReducer 
 });
 
 const allEnhancers = compose(

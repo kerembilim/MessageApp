@@ -8,16 +8,28 @@ import axios, { post } from 'axios';
 
 import { connect } from 'react-redux';
 import { updateUser, getUsers } from '../../src/actions/user-actions';
+import { getDocumentFilterTypeData } from '../../src/actions/documentFilterDataAction';
 
 import UploadAdapter from './UploadAdapter';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import DocumentListView from '../components/DocumentListView';
 class DocumentPage extends Component {
 
+    constructor(props) {
+        super(props);
+        this.FilterChange = this.FilterChange.bind(this);
+    }
+
     state = {
         contentData: null,
         documentList: []
     }
+
+    FilterChange = () => {
+        this.props.onFilterChange(document.getElementById('filtertype').value);
+        document.getElementById('choosingLane').style.display = 'block';
+    }
+
 
 
 
@@ -38,30 +50,101 @@ class DocumentPage extends Component {
                     />
                 </div>
                 <div className="col-md-9" style={{ padding: 0, height: '80vh', overflowY: 'scroll', overflowX: 'hidden' }}>
-                    <div style={{display:this.props.document.canedit == true ? 'none' : 'block',fontSize:'30px',color:'white'}}>
-                    Your changes will not save because you don\'t have edit permission.
+
+                    <div className="row" style={{ padding: '2%' }}>
+                        <div className="col-md-12 connectList" style={{ backgroundColor: 'white', paddingLeft: 10, paddingTop: 10 }}>
+                            {/* doküman bilgileri eklenecek*/}
+                            <div style={{ fontSize: '17px', color: 'black' }}>
+                                <ul>
+                                    {
+                                        typeof this.props.document.canedit === 'undefined' ? <li style={{ color: 'red' }}>Choose a document for edit or create</li> : <li style={{ color: 'red' }}>Your changes will not save because you don\'t have edit permission.</li>
+
+                                    }
+
+
+                                </ul>
+                                {
+                                    this.props.document.id === -1 ?
+                                        <div className="row">
+                                            <div className="col-md-6">
+                                                <div className="row">
+                                                    <div className="col-md-3 ml-3">
+                                                        <label>Title</label>
+
+                                                        <br />
+                                                        <label style={{ marginLeft: 2 }}>Description</label>
+
+                                                    </div>
+                                                    <div className="col-md-6">
+                                                        <input type="text" id="lname" name="lname" />
+                                                        <br />
+                                                        <input type="text" id="ln0ame" name="lnasdame" />
+                                                    </div>
+
+
+                                                </div>
+
+
+                                                <br />
+
+                                            </div>
+                                            <div className="col-md-6">
+                                                <div className="row">
+                                                    <div className="col-md-3">
+                                                        <label style={{ marginLeft: 2 }}>Filter Type</label>
+                                                    </div>
+                                                    <div className="col-md-9">
+                                                        <select id="filtertype" onChange={() => { this.FilterChange() }}>
+                                                            <option value="user">User</option>
+                                                            <option value="department">Department</option>
+                                                            <option value="workgroup">workgroup</option>
+                                                        </select>
+                                                        <div style={{ display: 'none' }} id="choosingLane">
+                                                            {
+                                                                 this.props.documentFilterData !== '' ?
+                                                                this.props.documentFilterData.map(index =>
+                                                                    <div>
+                                                                        <label >{index.name || index.username}</label>
+                                                                        <input type="checkbox" id={index.id} value={index.id} />
+                                                                    </div>
+                                                                ) : null
+                                                            }
+
+                                                        </div>
+
+
+                                                    </div>
+                                                    <div className="row">
+                                                        <div className="col-md-3">
+                                                        </div>
+                                                        <div className="col-md-9">
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+                                            </div>
+                                        </div> : ''
+                                }
+
+                            </div>
+                        </div>
                     </div>
                     <div className="row">
                         <div className="col-md-12">
                             <CKEditor
                                 editor={ClassicEditor}
-                                data={this.props.document.content + '  ' + this.props.document.canedit }
+                                data={this.props.document.content}
                                 onInit={editor => {
                                     editor.plugins.get('FileRepository').createUploadAdapter = function (loader) {
                                         return new UploadAdapter(loader);
                                     };
-                                    //if(this.props.document.canedit == true){
-                                    //    editor.isReadOnly = false
-                                    //}
-                                    //else{
-                                    //    editor.isReadOnly = true
-                                    //}
-                                    
                                 }}
 
 
                                 onFocus={(event, editor) => {
-                                        document.getElementById('saveButton').disabled = this.props.document.canedit;
+                                    document.getElementById('saveButton').disabled = this.props.document.canedit;
                                 }}
 
 
@@ -93,7 +176,8 @@ const mapStateToProps = (state, props) => {
 
 const mapDispatchToProps = {
     onUpdateUser: updateUser,
-    onGetUsers: getUsers
+    onGetUsers: getUsers,
+    onFilterChange: getDocumentFilterTypeData
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(DocumentPage);

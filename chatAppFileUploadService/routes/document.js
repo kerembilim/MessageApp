@@ -103,78 +103,100 @@ router.get('/getdocumentdetail/:id', tokenControl, async (req, res, next) => {//
 
     console.log(req.user);
     console.log(resDb.rows[0]);
-    
-    if(resDb.rows[0].filtertype === 'departmant')
-    {
-        for(var i =0 ;i<req.user.departmant.length ; i++){
-            const resDb2 = await client.query('select * from documentdepartmant where documentdepartmant.departmantid = $1 and documentdepartmant.documentid = $2 ', [req.user.departmant[i].departmantid,req.params.id]);
-            if(resDb2.rows[0].authorization == 1){//OKUMA
+
+    if (resDb.rows[0].filtertype === 'departmant') {
+        for (var i = 0; i < req.user.departmant.length; i++) {
+            const resDb2 = await client.query('select * from documentdepartmant where documentdepartmant.departmantid = $1 and documentdepartmant.documentid = $2 ', [req.user.departmant[i].departmantid, req.params.id]);
+            if (resDb2.rows[0].authorization == 1) {//OKUMA
                 canRead = true;
             }
-            else if(resDb2.rows[0].authorization == 2){//DÜZENLEME
+            else if (resDb2.rows[0].authorization == 2) {//DÜZENLEME
                 canEdit = true;
                 canRead = true;
             }
         }
-        
-    } 
-    else if(resDb.rows[0].filtertype === 'role'){
-        for(var i =0 ;i<req.user.role.length ; i++){
-            const resDb2 = await client.query('select * from documentrole where documentrole.roleid = $1 and documentrole.documentid = $2 ', [req.user.role[i].roleid,req.params.id]);
-            if(resDb2.rows[0].authorization == 1){//OKUMA
-                canRead = true;
-            }
-            else if(resDb2.rows[0].authorization == 2){//DÜZENLEME
-                canEdit = true;
-                canRead = true;
-            }
-        }
+
     }
-    else if(resDb.rows[0].filtertype === 'workgroup'){
-        for(var i =0 ;i<req.user.workgroup.length ; i++){
-            const resDb2 = await client.query('select * from documentworkgroup where documentworkgroup.workgroupid = $1 and documentworkgroup.documentid = $2', [req.user.workgroup[i].workgroupid,req.params.id]);
-            if(resDb2.rows[0].authorization == 1){//OKUMA
+    else if (resDb.rows[0].filtertype === 'role') {
+        for (var i = 0; i < req.user.role.length; i++) {
+            const resDb2 = await client.query('select * from documentrole where documentrole.roleid = $1 and documentrole.documentid = $2 ', [req.user.role[i].roleid, req.params.id]);
+            if (resDb2.rows[0].authorization == 1) {//OKUMA
                 canRead = true;
             }
-            else if(resDb2.rows[0].authorization == 2){//DÜZENLEME
+            else if (resDb2.rows[0].authorization == 2) {//DÜZENLEME
                 canEdit = true;
                 canRead = true;
             }
         }
     }
-    else{
-        
-            const resDb2 = await client.query('select * from documentuser where documentuser.userid = $1 and documentuser.documentid = $2 ', [req.user.id,req.params.id]);
-            if(resDb2.rows[0].authorization == 1){//OKUMA
+    else if (resDb.rows[0].filtertype === 'workgroup') {
+        for (var i = 0; i < req.user.workgroup.length; i++) {
+            const resDb2 = await client.query('select * from documentworkgroup where documentworkgroup.workgroupid = $1 and documentworkgroup.documentid = $2', [req.user.workgroup[i].workgroupid, req.params.id]);
+            if (resDb2.rows[0].authorization == 1) {//OKUMA
                 canRead = true;
             }
-            else if(resDb2.rows[0].authorization == 2){//DÜZENLEME
+            else if (resDb2.rows[0].authorization == 2) {//DÜZENLEME
                 canEdit = true;
                 canRead = true;
             }
+        }
     }
-    
+    else {
+
+        const resDb2 = await client.query('select * from documentuser where documentuser.userid = $1 and documentuser.documentid = $2 ', [req.user.id, req.params.id]);
+        if (resDb2.rows[0].authorization == 1) {//OKUMA
+            canRead = true;
+        }
+        else if (resDb2.rows[0].authorization == 2) {//DÜZENLEME
+            canEdit = true;
+            canRead = true;
+        }
+    }
+
     await client.end()
 
-    if(canRead === false){
-        res.json({status:'Forbidden document'});
+    if (canRead === false) {
+        res.json({ status: 'Forbidden document' });
     }
-    else if(canEdit == false){
+    else if (canEdit == false) {
         response = resDb.rows[0];
         response.canedit = false;
         res.json(response);
     }
-    else{
+    else {
         response = resDb.rows[0];
         response.canedit = true;
         res.json(response);
     }
 
 
-    
-    
+
+
 });
 
+router.post('/documentcreate', tokenControl, async (req, res, next) => {
+
+    try {
+        const client = await createClient();
+        await client.connect(err => {
+            if (err) {
+                console.error('connection error', err.stack)
+            }
+        });
+
+
+
+        const resDb = await client.query("INSERT INTO document ( content, createddate,  createruserid, description, filtertype, parenttitleid, title) VALUES ( $1, $2, $3, $4, $5, $6, $7 );");
+
+        await client.end()
+
+
+        res.json({statu:'success'});
+    } catch (err) {
+        res.json(err)
+    }
+
+});
 
 
 
