@@ -3,7 +3,7 @@ FROM node:8
 #uygulama 3000 portunu kullaniyor
 #ama biz localhost'tan direk gostermek istiyoruz.
 #Dolayisiyla 80 portuna yonlendirmeliyiz.
-EXPOSE 5000
+EXPOSE 4000
 #node'un uygulamayi yukleyecegimiz dizinine gidecegiz.
 #/usr/src/app
 WORKDIR /usr/src/app

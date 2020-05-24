@@ -38,7 +38,7 @@ bower_components
 run.sh
 
 #uploaded files
-chatAppFileUploadService/messageFile
+chatAppFileUploadService/messageFile/*
 
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 build/Release
