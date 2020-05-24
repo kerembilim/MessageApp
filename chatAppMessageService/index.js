@@ -20,7 +20,6 @@ mongoose.connect("mongodb://localhost/messageAppDB")
 
 
 let messageSave = (msg) => {
-  console.log(msg);
   let message = new MessageModel({
     content: msg.content,
     sender: msg.sender,
@@ -75,7 +74,6 @@ const getGroups = async (username) => {
 app.get('/getmessages', async(req, res) => {
   let groups = {}; 
   groups = await getGroups(req.query.username);
-  console.log('keremmm');
   MessageModel.find({ $or: [{ target: req.query.username }, { sender: req.query.username }, {target: groups.departmants[0].name } ] }).sort({ _id: 1 }).limit(500).exec(function (err, leads) {
     res.json(leads);
   });

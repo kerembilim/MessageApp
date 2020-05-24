@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import '../App.css';
 import axios, { post } from 'axios';
+import messageSound from '../utilies/piece-of-cake.mp3'
 
 const io = require('socket.io-client');
 
@@ -10,7 +11,7 @@ export default class MessagePage extends Component {
   list = [];
   constructor(props) {
     super(props);
-    this.state = { value: '', password: '', showModal: true, username: '', persons: [], departmants: [], workgroups: [], messageTarget: {}, messages: [], file: null, messageType:null };
+    this.state = { value: '', password: '', showModal: true, username: '', persons: [], departmants: [], workgroups: [], messageTarget: {}, messages: [], file: null, messageType: null };
     this.handleChange = this.handleChange.bind(this);
     this.sendMessage = this.sendMessage.bind(this);
     this.getContacts = this.getContacts.bind(this);
@@ -83,7 +84,11 @@ export default class MessagePage extends Component {
     var self = this;
     this.socket = io.connect('http://localhost:4000');
     this.socket.on(this.state.username, async (msg) => {
-      console.log(msg)
+      if (msg.sender !== self.state.messageTarget) {
+        document.getElementById(msg.sender + 'dot').style.display = 'block';
+        var audio = new Audio(messageSound);
+        audio.play();
+      }
       let newMessages = self.state.messages;
       newMessages.push(msg);
       document.getElementById('messageArea').innerHTML = "";
@@ -158,7 +163,6 @@ export default class MessagePage extends Component {
   }
 
   addMessageArea(message) {
-    console.log(this.state.messageType)
     var css, head, style, node;
     if (message.sender === this.state.username) {
       css = 'mymessage { background: #baecba; float:right; clear: both;padding:2%; margin:1%;max-width:300px; word-wrap:break-word;border-radius:5px; }';
@@ -183,8 +187,6 @@ export default class MessagePage extends Component {
 
         };
       }
-
-
     }
     else {
       css = 'stranger { background: #fffdfa; float:left; clear: both;padding:2%; margin:1%;max-width:300px; word-wrap:break-word;border-radius:5px; }';
@@ -192,10 +194,21 @@ export default class MessagePage extends Component {
       style = document.createElement('style');
       node = document.createElement("stranger");
       if (message.messageType === 'file') {
-        node.onclick = function () {
-          console.log('sdsssd');
-        };
-      }
+        console.log(message);
+        fetch('http://localhost:4010/fileupload/download/' + message.filename)
+          .then(response => {
+            response.blob().then(blob => {
+              let url = window.URL.createObjectURL(blob);
+              let a = document.createElement('a');
+              a.href = url;
+              a.download = message.content;
+              a.click();
+            });
+            //window.location.href = response.url;
+          });
+
+
+      };
     }
     head.appendChild(style);
 
@@ -252,28 +265,46 @@ export default class MessagePage extends Component {
 
         <div className="col-md-3">
           <div className="connectList">
-          </div>
-          {this.state.persons.map(index =>
-            <div key={index.username} className="connect" onClick={() => { this.setState({ messageTarget: index,messageType:'chat' }); document.getElementById('messageArea').innerHTML = ""; }} >
-              <img alt={index.username} src={index.image} style={{ height: 70, width: 70, float: 'left', borderRadius: 50, marginTop: 10, marginBottom: 10, backgroundSize: 'contain' }} />
-              <div>
-                <p style={{ marginLeft: 120, fontSize: 30, marginTop: 5, marginBottom: 0 }} >{index.username}</p>
-                <p style={{ marginLeft: 120, fontSize: 15, marginTop: 20, color: 'green' }} >{index.statu}</p>
-              </div>
+            {
+              this.state.persons.map(index =>
+                <div key={index.username} className="row mb-2 connect" onClick={() => { this.setState({ messageTarget: index, messageType: 'chat' }); document.getElementById('messageArea').innerHTML = ""; document.getElementById(index.username + 'dot').style.display = 'none' }} >
+                  <div className="col-md-4">
+                    <img alt={index.username} src={index.image} style={{ height: 70, width: 70, float: 'left', borderRadius: 50, marginTop: 10, marginBottom: 10, backgroundSize: 'contain' }} />
+                  </div>
+                  <div className="col-md-8">
+                    <div className="row">
+                      <div className="col-md-8">
+                        <p style={{ fontSize: 30 }} >{index.username}</p>
+                      </div>
+                      <div className="col-md-4" style={{ padding: '15px' }}>
+                        <span id={index.username + 'dot'} style={{ display: 'none' }} className="dot"></span>
+                      </div>
 
-            </div>)}
-          <div style={{ color: 'white', fontSize: '40px' }}>
-            <b>departmants</b>
-          </div>
-          {this.state.departmants.map(index =>
-            <div key={index.name} className="connect" onClick={async() => {document.getElementById('messageArea').innerHTML = "";  await this.setState({ messageTarget: index,messageType:'group' }); }} >
-              <img alt={index.name} src={index.photo} style={{ height: 70, width: 70, float: 'left', borderRadius: 50, marginTop: 10, marginBottom: 10, backgroundSize: 'contain' }} />
-              <div>
-                <p style={{ marginLeft: 120, fontSize: 30, marginTop: 5, marginBottom: 0 }} >{index.name}</p>
-              </div>
 
-            </div>)}
-          <hr />
+                    </div>
+                    <div className="row">
+                      <p style={{ fontSize: 15, color: 'green' }} >{index.statu}</p>
+                    </div>
+
+
+
+                  </div>
+                </div>
+              )}
+            <div style={{ color: 'white', fontSize: '40px' }}>
+              <b>departmants</b>
+            </div>
+            {this.state.departmants.map(index =>
+              <div key={index.name} className="connect" onClick={async () => { document.getElementById('messageArea').innerHTML = ""; await this.setState({ messageTarget: index, messageType: 'group' }); }} >
+                <img alt={index.name} src={index.photo} style={{ height: 70, width: 70, float: 'left', borderRadius: 50, marginTop: 10, marginBottom: 10, backgroundSize: 'contain' }} />
+                <div>
+                  <p style={{ marginLeft: 120, fontSize: 30, marginTop: 5, marginBottom: 0 }} >{index.name}</p>
+                </div>
+
+              </div>)}
+            <hr />
+
+          </div>
         </div>
         <div className="col-md-9">
           <div className="allMessageArea" id='' >
@@ -298,8 +329,8 @@ export default class MessagePage extends Component {
             <div id='messageArea' >
               {
                 this.state.messages.map(index => {
-                  if (((index.target === this.state.username && index.sender === this.state.messageTarget.username) || 
-                  (index.sender === this.state.username && index.target === this.state.messageTarget.username )) || (index.target === this.state.messageTarget.name && this.state.messageType === 'group')) {
+                  if (((index.target === this.state.username && index.sender === this.state.messageTarget.username) ||
+                    (index.sender === this.state.username && index.target === this.state.messageTarget.username)) || (index.target === this.state.messageTarget.name && this.state.messageType === 'group')) {
                     this.addMessageArea(index);
                   }
                 })
