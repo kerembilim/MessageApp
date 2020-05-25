@@ -28,7 +28,6 @@ export function getDocument(id) {
 				await axios.get('http://localhost:4010/document/getdocumentdetail/' + id, {
 					headers: { Authorization: "Bearer " + localStorage.getItem('userToken') }
 				}).then(function (response) {
-					console.log(response);
 					dispatch(updateDocument(response.data));
 				})
 			}
@@ -39,19 +38,35 @@ export function getDocument(id) {
 	}
 }
 
-export function createDocument() {
+export function createDocument(parenttitleid) {
 	return async dispatch => {
 		let document = {
-			"id":-1,
-			"createddate": null,
+			"id": -1,
 			"content": "3310",
 			"description": "",
 			"title": "",
 			"filtertype": null,
 			"createruserid": null,
-			"parenttitleid": null,
+			"parenttitleid": parenttitleid,
 			"canedit": true
 		}
 		dispatch(updateDocument(document));
+	}
+}
+
+export function saveNewDocument(document) {
+	return async dispatch => {
+		try {
+			if (localStorage.getItem('userToken') !== null && localStorage.getItem('userToken') !== '') {
+				await axios.post('http://localhost:4010/document/documentcreate/',document, {
+					headers: { Authorization: "Bearer " + localStorage.getItem('userToken') }
+				}).then(function (response) {
+					dispatch(updateDocument(document));
+					console.log(response)
+				})
+			}
+		} catch (e) {
+			dispatch(showError());
+		}
 	}
 }

@@ -12,10 +12,9 @@ class DocumentListView extends Component {
         this.onGetDocument = this.onGetDocument.bind(this);
     }
 
-    onGetDocument(id) {
-        console.log(id);
+    onGetDocument(id,parenttitleId) {
         if (id === -1) {
-            this.props.createDocument();
+            this.props.createDocument(parenttitleId);
         }
         else {
             this.props.onGetDocument(id);
@@ -33,7 +32,7 @@ class DocumentListView extends Component {
                                 {index[0].parenttitle}
                             </div>
                             <div className="col-md-4">
-                                <button onClick={() => { this.onGetDocument(-1); }}>+</button>
+                                <button onClick={() => { this.onGetDocument(-1,index[0].id); }}>+</button>
                             </div>
                         </div>
 

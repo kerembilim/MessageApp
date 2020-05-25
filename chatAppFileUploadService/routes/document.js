@@ -184,14 +184,19 @@ router.post('/documentcreate', tokenControl, async (req, res, next) => {
             }
         });
 
+        console.log(req.body)
+        if (req.body.id === -1) {
+            const resDb = await client.query("INSERT INTO document ( content, createddate,  createruserid, description, filtertype, parenttitleid, title) VALUES ( $1, $2, $3, $4, $5, $6, $7 );",
+                [req.body.content,new Date(),req.user.id,req.body.description,req.body.filtertype,req.body.parenttitleid,req.body.title]);
 
+                console.log('resDb')
+        }
 
-        const resDb = await client.query("INSERT INTO document ( content, createddate,  createruserid, description, filtertype, parenttitleid, title) VALUES ( $1, $2, $3, $4, $5, $6, $7 );");
 
         await client.end()
 
 
-        res.json({statu:'success'});
+        res.json({ statu: 'success' });
     } catch (err) {
         res.json(err)
     }

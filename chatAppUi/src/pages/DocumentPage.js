@@ -9,6 +9,7 @@ import axios, { post } from 'axios';
 import { connect } from 'react-redux';
 import { updateUser, getUsers } from '../../src/actions/user-actions';
 import { getDocumentFilterTypeData } from '../../src/actions/documentFilterDataAction';
+import { saveNewDocument } from '../../src/actions/document-actions';
 
 import UploadAdapter from './UploadAdapter';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -18,16 +19,48 @@ class DocumentPage extends Component {
     constructor(props) {
         super(props);
         this.FilterChange = this.FilterChange.bind(this);
+        this.documentSubmit = this.documentSubmit.bind(this);
+        this.input = React.createRef();
     }
 
     state = {
         contentData: null,
-        documentList: []
+        documentList: [],
+        descriptionText:'',
+        filtertype : '',
+        titleText:''
+        
     }
+
+    handleChangeDesc = (event) =>{
+        this.setState({descriptionText :event.target.value })
+    }
+
+    handleChangeTitle = (event) =>{
+        this.setState({titleText :event.target.value })
+    }
+
+
 
     FilterChange = () => {
         this.props.onFilterChange(document.getElementById('filtertype').value);
+        this.setState({filtertype: document.getElementById('filtertype').value });        
         document.getElementById('choosingLane').style.display = 'block';
+    }
+
+    documentSubmit = () => {
+        if (this.props.document.id === -1) {
+            let document = {
+                "id":-1,
+                "content": this.state.contentData,
+                "description": this.state.descriptionText,
+                "title": this.state.titleText,
+                "filtertype": this.state.filtertype,
+                "parenttitleid": this.props.document.parenttitleid
+            }
+            this.props.saveNewDocument(document);
+
+        }
     }
 
 
@@ -41,6 +74,8 @@ class DocumentPage extends Component {
             self.setState({ documentList: response.data })
         })
     }
+
+
     render() {
         return (
             <div className="row" style={{ padding: '1%' }}>
@@ -60,11 +95,9 @@ class DocumentPage extends Component {
                                         typeof this.props.document.canedit === 'undefined' ? <li style={{ color: 'red' }}>Choose a document for edit or create</li> : <li style={{ color: 'red' }}>Your changes will not save because you don\'t have edit permission.</li>
 
                                     }
-
-
                                 </ul>
                                 {
-                                    this.props.document.id === -1 ?
+                                    this.props.document.id === -1 || this.props.document.canedit ?
                                         <div className="row">
                                             <div className="col-md-6">
                                                 <div className="row">
@@ -76,9 +109,9 @@ class DocumentPage extends Component {
 
                                                     </div>
                                                     <div className="col-md-6">
-                                                        <input type="text" id="lname" name="lname" />
+                                                        <input type="text" id="documentTitle" onChange={this.handleChangeTitle} defaultValue={this.props.document.title} />
                                                         <br />
-                                                        <input type="text" id="ln0ame" name="lnasdame" />
+                                                        <input type="text" id="documentDesc"  onChange={this.handleChangeDesc} defaultValue={this.props.document.description} />
                                                     </div>
 
 
@@ -101,13 +134,13 @@ class DocumentPage extends Component {
                                                         </select>
                                                         <div style={{ display: 'none' }} id="choosingLane">
                                                             {
-                                                                 this.props.documentFilterData !== '' ?
-                                                                this.props.documentFilterData.map(index =>
-                                                                    <div>
-                                                                        <label >{index.name || index.username}</label>
-                                                                        <input type="checkbox" id={index.id} value={index.id} />
-                                                                    </div>
-                                                                ) : null
+                                                                this.props.documentFilterData !== '' ?
+                                                                    this.props.documentFilterData.map(index =>
+                                                                        <div>
+                                                                            <label >{index.name || index.username}</label>
+                                                                            <input type="checkbox" id={index.id} value={0} />
+                                                                        </div>
+                                                                    ) : null
                                                             }
 
                                                         </div>
@@ -144,12 +177,11 @@ class DocumentPage extends Component {
 
 
                                 onFocus={(event, editor) => {
-                                    document.getElementById('saveButton').disabled = this.props.document.canedit;
+                                    document.getElementById('saveButton').disabled = !this.props.document.canedit;
                                 }}
 
 
                                 onChange={(event, editor) => {
-
                                     const data = editor.getData();
                                     this.setState({ contentData: data });
                                 }}
@@ -158,7 +190,7 @@ class DocumentPage extends Component {
                     </div>
 
 
-                    <button id='saveButton' onClick={() => { console.log(this.state.contentData); }}>sdasda</button>
+                    <button id='saveButton' onClick={() => { this.documentSubmit() }}>Kaydet</button>
                 </div>
             </div>
 
@@ -177,7 +209,8 @@ const mapStateToProps = (state, props) => {
 const mapDispatchToProps = {
     onUpdateUser: updateUser,
     onGetUsers: getUsers,
-    onFilterChange: getDocumentFilterTypeData
+    onFilterChange: getDocumentFilterTypeData,
+    saveNewDocument
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(DocumentPage);
