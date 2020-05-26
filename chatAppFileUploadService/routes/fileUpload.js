@@ -74,6 +74,7 @@ router.get('/download/:name', function (req, res) {
 
 
 router.post('/messagefileupload', tokenControl, function (req, res) {
+  console.log('keremmmmm')
   messagefileupload(req, res, function (err) {
     if (err instanceof multer.MulterError) {
       return res.status(500).json(err)

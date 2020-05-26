@@ -23,7 +23,6 @@ const createClient = () => {
 
 
 
-
 const tokenControl = async (req, res, next) => {
   const bearerHeader = req.headers["authorization"];
   console.log('sss');
@@ -65,7 +64,7 @@ const tokenControl = async (req, res, next) => {
   }
 };
 /* GET users listing. */
-router.get('/', tokenControl, async (req, res, next) => {
+router.get('/protected', tokenControl, async (req, res, next) => {
   const client = createClient();
   client.connect(err => {
     if (err) {
@@ -317,12 +316,8 @@ router.post('/register', async (req, res, next) => {
   }
 });
 
-router.get('/protected', (req, res, next) => {
-  var ees = req.userData;
-  res.json({
-    status: 'this is protected',
-    ees
-  });
+router.get('/', (req, res, next) => {
+  res.json({status:'working'  });
 });
 
 
