@@ -107,10 +107,10 @@ router.get('/getdocumentdetail/:id', tokenControl, async (req, res, next) => {//
     if (resDb.rows[0].filtertype === 'departmant') {
         for (var i = 0; i < req.user.departmant.length; i++) {
             const resDb2 = await client.query('select * from documentdepartmant where documentdepartmant.departmantid = $1 and documentdepartmant.documentid = $2 ', [req.user.departmant[i].departmantid, req.params.id]);
-            if (resDb2.rows[0].authorization == 1) {//OKUMA
+            if (resDb2.rows[0].authorizations == 1) {//OKUMA
                 canRead = true;
             }
-            else if (resDb2.rows[0].authorization == 2) {//DÜZENLEME
+            else if (resDb2.rows[0].authorizations == 2) {//DÜZENLEME
                 canEdit = true;
                 canRead = true;
             }
@@ -120,10 +120,10 @@ router.get('/getdocumentdetail/:id', tokenControl, async (req, res, next) => {//
     else if (resDb.rows[0].filtertype === 'role') {
         for (var i = 0; i < req.user.role.length; i++) {
             const resDb2 = await client.query('select * from documentrole where documentrole.roleid = $1 and documentrole.documentid = $2 ', [req.user.role[i].roleid, req.params.id]);
-            if (resDb2.rows[0].authorization == 1) {//OKUMA
+            if (resDb2.rows[0].authorizations == 1) {//OKUMA
                 canRead = true;
             }
-            else if (resDb2.rows[0].authorization == 2) {//DÜZENLEME
+            else if (resDb2.rows[0].authorizations == 2) {//DÜZENLEME
                 canEdit = true;
                 canRead = true;
             }
@@ -132,10 +132,10 @@ router.get('/getdocumentdetail/:id', tokenControl, async (req, res, next) => {//
     else if (resDb.rows[0].filtertype === 'workgroup') {
         for (var i = 0; i < req.user.workgroup.length; i++) {
             const resDb2 = await client.query('select * from documentworkgroup where documentworkgroup.workgroupid = $1 and documentworkgroup.documentid = $2', [req.user.workgroup[i].workgroupid, req.params.id]);
-            if (resDb2.rows[0].authorization == 1) {//OKUMA
+            if (resDb2.rows[0].authorizations == 1) {//OKUMA
                 canRead = true;
             }
-            else if (resDb2.rows[0].authorization == 2) {//DÜZENLEME
+            else if (resDb2.rows[0].authorizations == 2) {//DÜZENLEME
                 canEdit = true;
                 canRead = true;
             }
@@ -144,10 +144,10 @@ router.get('/getdocumentdetail/:id', tokenControl, async (req, res, next) => {//
     else {
 
         const resDb2 = await client.query('select * from documentuser where documentuser.userid = $1 and documentuser.documentid = $2 ', [req.user.id, req.params.id]);
-        if (resDb2.rows[0].authorization == 1) {//OKUMA
+        if (resDb2.rows[0].authorizations == 1) {//OKUMA
             canRead = true;
         }
-        else if (resDb2.rows[0].authorization == 2) {//DÜZENLEME
+        else if (resDb2.rows[0].authorizations == 2) {//DÜZENLEME
             canEdit = true;
             canRead = true;
         }
@@ -183,19 +183,50 @@ router.post('/documentcreate', tokenControl, async (req, res, next) => {
                 console.error('connection error', err.stack)
             }
         });
-
-        console.log(req.body)
         if (req.body.id === -1) {
-            const resDb = await client.query("INSERT INTO document ( content, createddate,  createruserid, description, filtertype, parenttitleid, title) VALUES ( $1, $2, $3, $4, $5, $6, $7 );",
-                [req.body.content,new Date(),req.user.id,req.body.description,req.body.filtertype,req.body.parenttitleid,req.body.title]);
+            let resDb = await client.query("INSERT INTO document ( content, createddate,  createruserid, description, filtertype, parenttitleid, title) VALUES ( $1, $2, $3, $4, $5, $6, $7 );",
+                [req.body.content, new Date(), req.user.id, req.body.description, req.body.filtertype, req.body.parenttitleid, req.body.title]);
 
-                console.log('resDb')
+            resDb = await client.query("SELECT max(id) from document");
+            resDb = await Number(resDb.rows[0].max);
+
+            if (req.body.filtertype === 'user') {
+                for (let i = 0; i < req.body.documentFilterData.length; i++) {
+                    await client.query("INSERT INTO documentuser ( userid, documentid, authorizations ) VALUES ( $1, $2, 2 );",
+                        [req.body.documentFilterData[i], resDb]);
+                }
+            }
+            else if (req.body.filtertype === 'department') {
+                for (let i = 0; i < req.body.documentFilterData.length; i++) {
+                    await client.query("INSERT INTO documentdepartmant ( departmanid, documentid, authorizations) VALUES ( $1, $2, $3 );",
+                        [req.body.documentFilterData[i], resDb, '2']);
+                }
+            }
         }
+        else {
+            await client.query("UPDATE document SET content = $1, createruserid = $2, description = $3, filtertype = $4, parenttitleid = $5, title = $6 WHERE id = $7",
+                [req.body.content, req.user.id, req.body.description, req.body.filtertype, req.body.parenttitleid, req.body.title,req.body.id]);
+            let resDb = req.body.id;
+            if (req.body.filtertype === 'user') {
+                await client.query("DELETE from documentuser where documentid = $1;",
+                        [req.body.id]);
 
+                for (let i = 0; i < req.body.documentFilterData.length; i++) {
+                    await client.query("INSERT INTO documentuser ( userid, documentid, authorizations ) VALUES ( $1, $2, 2 );",
+                        [req.body.documentFilterData[i], resDb]);
+                }
+            }
+            else if (req.body.filtertype === 'department') {
+                await client.query("DELETE from documentdepartmant where documentid = $1;",
+                        [req.body.id]);
 
+                for (let i = 0; i < req.body.documentFilterData.length; i++) {
+                    await client.query("INSERT INTO documentdepartmant ( departmanid, documentid, authorizations) VALUES ( $1, $2, $3 );",
+                        [req.body.documentFilterData[i], resDb, '2']);
+                }
+            }
+        }
         await client.end()
-
-
         res.json({ statu: 'success' });
     } catch (err) {
         res.json(err)

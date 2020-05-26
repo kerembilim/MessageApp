@@ -26,7 +26,7 @@ class DocumentListView extends Component {
         return (
             <div className="connectList" style={{ backgroundColor: 'white', paddingLeft: 10, paddingTop: 10 }}>
                 {this.props.documentList.map(index =>
-                    <div key={index.id} >
+                    <div key={index[0].id} >
                         <div className="row">
                             <div className="col-md-8">
                                 {index[0].parenttitle}

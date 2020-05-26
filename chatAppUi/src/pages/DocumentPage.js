@@ -26,37 +26,58 @@ class DocumentPage extends Component {
     state = {
         contentData: null,
         documentList: [],
-        descriptionText:'',
-        filtertype : '',
-        titleText:''
-        
+        descriptionText: '',
+        filtertype: '',
+        titleText: ''
+
     }
 
-    handleChangeDesc = (event) =>{
-        this.setState({descriptionText :event.target.value })
+    handleChangeDesc = (event) => {
+        this.setState({ descriptionText: event.target.value })
     }
 
-    handleChangeTitle = (event) =>{
-        this.setState({titleText :event.target.value })
+    handleChangeTitle = (event) => {
+        this.setState({ titleText: event.target.value })
     }
-
-
 
     FilterChange = () => {
         this.props.onFilterChange(document.getElementById('filtertype').value);
-        this.setState({filtertype: document.getElementById('filtertype').value });        
+        this.setState({ filtertype: document.getElementById('filtertype').value });
         document.getElementById('choosingLane').style.display = 'block';
     }
 
     documentSubmit = () => {
+        console.log(this.state.titleText);
+        var elements = document.getElementsByClassName('documentfilterData');
+        let documentFilterData = [];
+        for (var i = 0; i < elements.length; i++) {
+            if (elements[i].checked === true) {
+                documentFilterData.push(Number(elements[i].id));
+            }
+        }
         if (this.props.document.id === -1) {
             let document = {
-                "id":-1,
+                "id": -1,
                 "content": this.state.contentData,
                 "description": this.state.descriptionText,
                 "title": this.state.titleText,
                 "filtertype": this.state.filtertype,
-                "parenttitleid": this.props.document.parenttitleid
+                "parenttitleid": this.props.document.parenttitleid,
+                "documentFilterData": documentFilterData
+            }
+            this.props.saveNewDocument(document);
+
+        }
+        else {
+            console.log(this.props.document.id);
+            let document = {
+                "id": this.props.document.id,
+                "content": this.state.contentData,
+                "description": this.state.descriptionText,
+                "title": this.state.titleText,
+                "filtertype": this.state.filtertype,
+                "parenttitleid": this.props.document.parenttitleid,
+                "documentFilterData": documentFilterData
             }
             this.props.saveNewDocument(document);
 
@@ -111,7 +132,7 @@ class DocumentPage extends Component {
                                                     <div className="col-md-6">
                                                         <input type="text" id="documentTitle" onChange={this.handleChangeTitle} defaultValue={this.props.document.title} />
                                                         <br />
-                                                        <input type="text" id="documentDesc"  onChange={this.handleChangeDesc} defaultValue={this.props.document.description} />
+                                                        <input type="text" id="documentDesc" onChange={this.handleChangeDesc} defaultValue={this.props.document.description} />
                                                     </div>
 
 
@@ -138,7 +159,7 @@ class DocumentPage extends Component {
                                                                     this.props.documentFilterData.map(index =>
                                                                         <div>
                                                                             <label >{index.name || index.username}</label>
-                                                                            <input type="checkbox" id={index.id} value={0} />
+                                                                            <input type="checkbox" id={index.id} className="documentfilterData" />
                                                                         </div>
                                                                     ) : null
                                                             }
